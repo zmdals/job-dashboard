@@ -79,7 +79,7 @@ export const handlers = [
 
     const user = db.users.find(
       (candidate) =>
-        candidate.loginId === id &&
+        candidate.email === id &&
         candidate.password === password,
     )
 

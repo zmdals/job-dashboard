@@ -391,7 +391,7 @@ components:
       properties:
         id:
           type: string
-          examples: [hong123]
+          examples: [hong@example.com]
         password:
           type: string
           format: password

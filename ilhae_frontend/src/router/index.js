@@ -1,20 +1,35 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import SwaggerDocs from '@/views/SwaggerDocs.vue'
-import LoginView from '@/views/LoginView.vue'
+import { createRouter, createWebHistory } from "vue-router";
+import SwaggerDocs from "@/views/SwaggerDocs.vue";
+import LoginView from "@/views/LoginView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'login',
+      path: "/",
+      name: "login",
       component: LoginView,
     },
     {
-      path: '/docs',
+      path: "/home",
+      name: "home",
+      component: () => import("@/views/HomeView.vue"),
+    },
+    {
+      path: "/signup",
+      name: "signup",
+      component: () => import("@/views/SignupView.vue"),
+    },
+    {
+      path: "/postings",
+      name: "postings",
+      component: () => import("@/views/PostingsView.vue"),
+    },
+    {
+      path: "/docs",
       component: SwaggerDocs,
     },
   ],
-})
+});
 
-export default router
+export default router;

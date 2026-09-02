@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import OurBox from "../OurBox.vue";
-import PostCard from "./PostCard.vue";
+import PostCard from "./PostingCard.vue";
 import { api } from "@/api/client.js";
 
 const allPosts = ref([]);
@@ -22,7 +22,7 @@ onMounted(async () => {
 <template>
   <OurBox>
     <div class="postContainer">
-      <div class="postHeader" style="display: flex; flex-direction: row; margin: auto">
+      <div class="postHeader" style="display: flex; flex-direction: row; margin: auto;">
         <p>공고이름</p>
         <p>직무적합도</p>
         <p>언제까지</p>

@@ -1,0 +1,20 @@
+# Java / Spring Boot
+backend/build/
+backend/.gradle/
+backend/bin/
+*.class
+*.jar
+
+# Vue.js / Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# 환경변수
+*.env
+application-local.yml

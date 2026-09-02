@@ -1,7 +1,6 @@
 package com.jobdashboard.backend.entity;
 
-import java.time.LocalDate;
-
+import com.jobdashboard.backend.entity.base.BaseCreatedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,15 +9,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.Getter;
+import lombok.*;
+
+/**
+ * 프로젝트(포트폴리오) 엔티티
+ * start_date, end_date 필드 삭제 함. 불필요.
+ */
 
 @Getter
 @Entity
-public class Project {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class Project extends BaseCreatedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "project_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -34,16 +40,7 @@ public class Project {
     @Column(name = "tech_stack")
     private String techStack;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
-
-    @Column(name = "end_date", nullable = false)
-    private LocalDate endDate;
-
     @Column(name = "description")
     private String description;
 
-    protected Project() {
-        // Default constructor for JPA
-    }
 }

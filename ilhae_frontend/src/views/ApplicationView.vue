@@ -1,8 +1,9 @@
 <script setup>
+import ApplicationComp from '@/components/ApplicationView/ApplicationComp.vue';
 </script>
 
 <template>
-    <h1>a</h1>
+    <ApplicationComp />
 </template>
 
 <style scoped>

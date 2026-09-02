@@ -325,21 +325,8 @@ location.reload()
 
 ---
 
-## 9. 지금 일부러 안 정한 것
+## 9. Mock 데이터 써먹는 법
 
-다음은 필요해질 때 추가하는 것을 권장합니다.
-
-- 공고 검색/필터/페이지네이션
-- refresh token
-- 토큰 만료/재발급 규약
-- password 정책
-- DTO별 상세 validation
-- 공통 response envelope
-- 상태 변경 transition 규칙
-- 관리자 application 목록 API
-- optimistic update 정책
-- 날짜/시간 timezone 규칙
-- API versioning (`/api/v1`)
-- OpenAPI 기반 client/type 자동 생성
-
-지금은 화면 개발을 시작하기 충분한 정도만 구성했습니다.
+npm i -D msw
+npm i swagger-ui-dist
+npx msw init public --save

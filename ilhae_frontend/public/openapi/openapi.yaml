@@ -1,0 +1,663 @@
+openapi: 3.1.0
+
+info:
+  title: Recruiting API
+  version: 0.1.0
+  description: |
+    프론트엔드/백엔드 병렬 개발을 위한 초기 API 계약.
+    현재는 핵심 엔드포인트와 최소 데이터 모델만 정의한다.
+    페이지네이션, refresh token, 세부 validation 등의 규약은 추후 확장한다.
+
+servers:
+  - url: /api
+
+tags:
+  - name: Auth
+  - name: Postings
+  - name: Me
+  - name: Users
+  - name: Admin
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: 로그인
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/signup:
+    post:
+      tags: [Auth]
+      summary: 회원가입
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: 회원가입 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '409':
+          description: 아이디 또는 이메일 중복
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /postings:
+    get:
+      tags: [Postings]
+      summary: 전체 공고 조회
+      operationId: getPostings
+      responses:
+        '200':
+          description: 공고 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Posting'
+
+  /postings/{postingId}:
+    get:
+      tags: [Postings]
+      summary: 공고 상세 조회
+      operationId: getPosting
+      parameters:
+        - $ref: '#/components/parameters/PostingId'
+      responses:
+        '200':
+          description: 공고 상세
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posting'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /postings/{postingId}/relevance:
+    get:
+      tags: [Postings]
+      summary: 현재 사용자와 공고의 적합도 조회
+      operationId: getPostingRelevance
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostingId'
+      responses:
+        '200':
+          description: 적합도
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relevance'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /postings/{postingId}/info:
+    get:
+      tags: [Postings]
+      summary: 공고 및 회사 관련 부가 정보 조회
+      operationId: getPostingInfo
+      parameters:
+        - $ref: '#/components/parameters/PostingId'
+      responses:
+        '200':
+          description: 공고 관련 부가 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostingInfo'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /me/applications:
+    get:
+      tags: [Me]
+      summary: 내 지원 현황 조회
+      operationId: getMyApplications
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 내 지원 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Application'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /postings/{postingId}/applications:
+    post:
+      tags: [Me]
+      summary: 공고 지원
+      operationId: applyPosting
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostingId'
+      responses:
+        '201':
+          description: 지원 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 이미 지원했거나 지원할 수 없는 상태
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /me/starred-postings:
+    get:
+      tags: [Me]
+      summary: 즐겨찾기 공고 조회
+      operationId: getMyStarredPostings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 즐겨찾기 공고 목록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Posting'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /me/starred-postings/{postingId}:
+    post:
+      tags: [Me]
+      summary: 즐겨찾기 추가
+      operationId: starPosting
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostingId'
+      responses:
+        '201':
+          description: 즐겨찾기 추가 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StarredPosting'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 이미 즐겨찾기한 공고
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Me]
+      summary: 즐겨찾기 제거
+      operationId: unstarPosting
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostingId'
+      responses:
+        '204':
+          description: 즐겨찾기 제거 완료
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: 내 정보 조회
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 내 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me/certificates:
+    post:
+      tags: [Users]
+      summary: 자격증 추가
+      operationId: addMyCertificate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificateCreateRequest'
+      responses:
+        '201':
+          description: 추가된 자격증
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me/certificates/{certificateId}:
+    delete:
+      tags: [Users]
+      summary: 자격증 삭제
+      operationId: deleteMyCertificate
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CertificateId'
+      responses:
+        '204':
+          description: 삭제 완료
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /admin/applications/{applicationId}/status:
+    patch:
+      tags: [Admin]
+      summary: 지원 상태 변경
+      operationId: updateApplicationStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStatusUpdateRequest'
+      responses:
+        '200':
+          description: 변경된 지원 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+        '400':
+          description: 잘못된 상태값
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PostingId:
+      name: postingId
+      in: path
+      required: true
+      schema:
+        type: string
+
+    CertificateId:
+      name: certificateId
+      in: path
+      required: true
+      schema:
+        type: string
+
+    ApplicationId:
+      name: applicationId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    Unauthorized:
+      description: 인증 필요
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: 권한 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: 리소스를 찾을 수 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    LoginRequest:
+      type: object
+      required: [id, password]
+      properties:
+        id:
+          type: string
+          examples: [hong123]
+        password:
+          type: string
+          format: password
+          examples: [password123!]
+
+    LoginResponse:
+      type: object
+      required: [accessToken]
+      properties:
+        accessToken:
+          type: string
+
+    SignupRequest:
+      type: object
+      required: [id, password, email, name]
+      properties:
+        id:
+          type: string
+        password:
+          type: string
+          format: password
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+
+    User:
+      type: object
+      required: [id, loginId, email, name, role, skills, certificates]
+      properties:
+        id:
+          type: string
+        loginId:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        skills:
+          type: array
+          items:
+            type: string
+        certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certificate'
+
+    UserRole:
+      type: string
+      enum: [USER, ADMIN]
+
+    Company:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        logoUrl:
+          type: [string, 'null']
+          format: uri
+
+    Posting:
+      type: object
+      required:
+        - id
+        - title
+        - company
+        - location
+        - employmentType
+        - techStack
+        - summary
+        - description
+        - deadline
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        company:
+          $ref: '#/components/schemas/Company'
+        location:
+          type: string
+        employmentType:
+          type: string
+        experienceLevel:
+          type: string
+        techStack:
+          type: array
+          items:
+            type: string
+        summary:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        preferredQualifications:
+          type: array
+          items:
+            type: string
+        deadline:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    Relevance:
+      type: object
+      required: [postingId, score, matchedSkills, missingSkills, summary]
+      properties:
+        postingId:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        matchedSkills:
+          type: array
+          items:
+            type: string
+        missingSkills:
+          type: array
+          items:
+            type: string
+        summary:
+          type: string
+
+    PostingInfo:
+      type: object
+      required: [postingId, company, papers, articles]
+      properties:
+        postingId:
+          type: string
+        company:
+          type: object
+          required: [id, name, description]
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            description:
+              type: string
+            homepageUrl:
+              type: [string, 'null']
+              format: uri
+        papers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalResource'
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalResource'
+
+    ExternalResource:
+      type: object
+      required: [id, title, url]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        publishedAt:
+          type: [string, 'null']
+          format: date
+
+    Application:
+      type: object
+      required: [id, userId, postingId, posting, status, appliedAt, updatedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        postingId:
+          type: string
+        posting:
+          $ref: '#/components/schemas/Posting'
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        appliedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ApplicationStatus:
+      type: string
+      enum:
+        - APPLIED
+        - DOCUMENT_PASSED
+        - DOCUMENT_FAILED
+        - INTERVIEW
+        - FINAL_PASSED
+        - FINAL_FAILED
+        - WITHDRAWN
+
+    ApplicationStatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+
+    StarredPosting:
+      type: object
+      required: [postingId]
+      properties:
+        postingId:
+          type: string
+
+    Certificate:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        issuer:
+          type: [string, 'null']
+        issuedAt:
+          type: [string, 'null']
+          format: date
+        expiresAt:
+          type: [string, 'null']
+          format: date
+        credentialId:
+          type: [string, 'null']
+
+    CertificateCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        issuer:
+          type: [string, 'null']
+        issuedAt:
+          type: [string, 'null']
+          format: date
+        expiresAt:
+          type: [string, 'null']
+          format: date
+        credentialId:
+          type: [string, 'null']
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

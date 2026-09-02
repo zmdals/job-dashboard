@@ -3,23 +3,23 @@ package com.jobdashboard.backend.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.Getter;
+import com.jobdashboard.backend.entity.base.BaseEntity;
+import com.jobdashboard.backend.entity.enums.ApplicationStatus;
+import jakarta.persistence.*;
+import lombok.*;
 
+/**
+ * 지원 엔티티
+ */
 @Entity
 @Getter
-public class Application {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class Application extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "application_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -30,22 +30,18 @@ public class Application {
     @JoinColumn(name = "job_posting_id", nullable = false)
     private JobPosting jobPosting;
 
-    @Column(name = "status", nullable = false)
-    private String status;
+    /**
+     * 지원 상태 흐름:
+     * PREPARING → APPLIED → INTERVIEW → ACCEPTED / REJECTED
+     */
+    @Column(name = "application_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ApplicationStatus applicationStatus;
 
-    @Column(name = "applied_date", nullable = false)
+    //nullable이 아니면, 지원 전 상태일때 필수값으로 뭔가 들어가야 함, 모순.
+    @Column(name = "applied_date")
     private LocalDate appliedDate;
 
-    // @Column(name = "memo")
-    // private String memo;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    protected Application() {
-        // Default constructor for JPA
-    }
+    // 대시보드에서 사용자의 메모
+    private String memo;
 }

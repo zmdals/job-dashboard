@@ -1,7 +1,8 @@
 package com.jobdashboard.backend.entity;
 
+import com.jobdashboard.backend.entity.base.BaseEntity;
 import jakarta.persistence.Table;
-import lombok.Getter;
+import lombok.*;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 
@@ -12,25 +13,27 @@ import jakarta.persistence.GenerationType;
 @Entity
 @Table(name = "users")
 @Getter
-
-public class User {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
+    //로그인 식별자
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    //암호화 저장
+    @Column(name = "password", nullable = false)
+    private String password;
 
     @Column(nullable = false)
     private String name;
 
-    private String phone;
+    @Column(name = "phone_number")
+    private String phoneNumber;
 
-    protected User() {
-        // Default constructor for JPA
-    }
 }

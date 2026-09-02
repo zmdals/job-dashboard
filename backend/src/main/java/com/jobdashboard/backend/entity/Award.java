@@ -2,6 +2,7 @@ package com.jobdashboard.backend.entity;
 
 import java.time.LocalDate;
 
+import com.jobdashboard.backend.entity.base.BaseCreatedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,13 +11,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.*;
 
+/**
+ * 수상 엔티티
+ */
 @Entity
-public class Award {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class Award extends BaseCreatedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "award_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -24,19 +32,18 @@ public class Award {
     private User user;
 
     @Column(name = "award_name", nullable = false)
+    // 수상이름
     private String awardName;
 
-    @Column(name = "organizer", nullable = false)
+    // 주최기관
     private String organizer;
 
-    @Column(name = "award_date", nullable = false)
+    // 수상일자 - 모를 수 있으니, nullable or 연도만 받기?
+    // 프론트에서 연도만 받도록 처리.
+    @Column(name = "award_date")
     private LocalDate awardDate;
 
-    @Column(name = "description")
+    // 수상 내용
     private String description;
-
-    protected Award() {
-        // Default constructor for JPA
-    }
 
 }

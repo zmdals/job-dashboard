@@ -10,4 +10,6 @@ public interface CoverLetterRepository extends JpaRepository<CoverLetter, Long> 
     boolean existsByApplicationId(Long applicationId);
 
     Optional<CoverLetter> findByApplicationId(Long applicationId);
+
+    Optional<CoverLetter> findByIdAndApplicationId(Long id, Long applicationId);
 }

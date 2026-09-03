@@ -2,10 +2,12 @@ package com.jobdashboard.backend.controller;
 
 import com.jobdashboard.backend.dto.common.ApiResponse;
 import com.jobdashboard.backend.dto.starredposting.StarredPostingRes;
+import com.jobdashboard.backend.security.CustomUserDetails;
 import com.jobdashboard.backend.service.StarredPostingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,22 +28,24 @@ public class StarredPostingController {
 
     @Operation(summary = "관심 공고 조회", description = "현재 사용자가 저장한 모든 관심 공고를 최신순으로 조회합니다")
     @GetMapping
-    public ApiResponse<List<StarredPostingRes>> getAll() {
-        Long userId = 1L;
+    public ApiResponse<List<StarredPostingRes>> getAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(starredPostingService.getAll(userId));
     }
 
     @Operation(summary = "관심 공고 등록", description = "채용공고를 현재 사용자의 관심 공고로 등록합니다")
     @PostMapping("/{postingId}")
-    public ApiResponse<StarredPostingRes> create(@PathVariable Long postingId) {
-        Long userId = 1L;
+    public ApiResponse<StarredPostingRes> create(@PathVariable Long postingId,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(starredPostingService.create(userId, postingId));
     }
 
     @Operation(summary = "관심 공고 삭제", description = "현재 사용자의 관심 공고에서 해당 채용공고를 삭제합니다")
     @DeleteMapping("/{postingId}")
-    public ApiResponse<Void> remove(@PathVariable Long postingId) {
-        Long userId = 1L;
+    public ApiResponse<Void> remove(@PathVariable Long postingId,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         starredPostingService.remove(userId, postingId);
         return ApiResponse.ok(null, "삭제 완료");
     }

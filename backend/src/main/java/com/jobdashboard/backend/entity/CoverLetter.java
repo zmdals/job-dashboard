@@ -49,4 +49,8 @@ public class CoverLetter extends BaseCreatedEntity {
     @Column(columnDefinition = "INTEGER DEFAULT 1")
     private Integer version = 1;
 
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

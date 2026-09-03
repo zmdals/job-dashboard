@@ -5,11 +5,13 @@ import com.jobdashboard.backend.dto.common.ApiResponse;
 import com.jobdashboard.backend.dto.company.CompanyEvidenceRes;
 import com.jobdashboard.backend.dto.matchanalysis.MatchAnalysisReq;
 import com.jobdashboard.backend.dto.matchanalysis.MatchAnalysisRes;
+import com.jobdashboard.backend.security.CustomUserDetails;
 import com.jobdashboard.backend.service.AiMockService;
 import com.jobdashboard.backend.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,18 +34,19 @@ public class AiMockController {
     // 2. 매칭 분석 생성 (저장형, 덮어쓰기)
     @Operation(summary = "AI 매칭 분석 생성", description = "스펙 기반 분석, 자소서 포함 시 점수 갱신")
     @PostMapping("/api/applications/{applicationId}/ai/analysis")
-    public ApiResponse<MatchAnalysisRes> createAnalysis(
-            @PathVariable Long applicationId,
-            @RequestBody MatchAnalysisReq req) {
-        Long userId = 1L;
+    public ApiResponse<MatchAnalysisRes> createAnalysis(@PathVariable Long applicationId,
+                                                        @RequestBody MatchAnalysisReq req,
+                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(aiMockService.createAnalysis(applicationId, userId, req));
     }
 
     // 3. 매칭 분석 조회
     @Operation(summary = "AI 매칭 분석 조회", description = "저장된 매칭 분석 결과 조회")
     @GetMapping("/api/applications/{applicationId}/ai/analysis")
-    public ApiResponse<MatchAnalysisRes> getAnalysis(@PathVariable Long applicationId) {
-        Long userId = 1L;
+    public ApiResponse<MatchAnalysisRes> getAnalysis(@PathVariable Long applicationId,
+                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(aiMockService.getAnalysis(applicationId, userId));
     }
 
@@ -57,18 +60,18 @@ public class AiMockController {
     // 5. 면접 질문 생성 (저장형, 덮어쓰기)
     @Operation(summary = "AI 면접 질문 생성", description = "공고 요건 기반 예상 면접 질문 생성")
     @PostMapping("/api/applications/{applicationId}/ai/interview-questions")
-    public ApiResponse<List<InterviewQuestionRes>> createInterviewQuestions(
-            @PathVariable Long applicationId) {
-        Long userId = 1L;
+    public ApiResponse<List<InterviewQuestionRes>> createInterviewQuestions(@PathVariable Long applicationId,
+                                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(aiMockService.createInterviewQuestions(applicationId, userId));
     }
 
     // 6. 면접 질문 조회
     @Operation(summary = "AI 면접 질문 조회", description = "생성된 면접 예상 질문 목록 조회")
     @GetMapping("/api/applications/{applicationId}/ai/interview-questions")
-    public ApiResponse<List<InterviewQuestionRes>> getInterviewQuestions(
-            @PathVariable Long applicationId) {
-        Long userId = 1L;
+    public ApiResponse<List<InterviewQuestionRes>> getInterviewQuestions(@PathVariable Long applicationId,
+                                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(aiMockService.getInterviewQuestions(applicationId, userId));
     }
 

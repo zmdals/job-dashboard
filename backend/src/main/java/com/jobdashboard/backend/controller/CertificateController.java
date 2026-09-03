@@ -2,6 +2,8 @@ package com.jobdashboard.backend.controller;
 
 import java.util.List;
 
+import com.jobdashboard.backend.security.CustomUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,8 +35,8 @@ public class CertificateController {
     @Operation(summary = "전체 자격증 조회", description = "등록된 모든 자격증을 조회합니다")
 
     @GetMapping
-    public ApiResponse<List<CertificateRes>> getAll() {
-        Long userId = 1L;
+    public ApiResponse<List<CertificateRes>> getAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(certificateService.getAll(userId));
     }
 
@@ -47,23 +49,26 @@ public class CertificateController {
 
     @Operation(summary = "자격증 등록", description = "새 자격증을 등록합니다")
     @PostMapping
-    public ApiResponse<CertificateRes> create(@Valid @RequestBody CertificateReq req) {
-        Long userId = 1L;
+    public ApiResponse<CertificateRes> create(@Valid @RequestBody CertificateReq req,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(certificateService.create(req, userId));
     }
 
     @Operation(summary = "자격증 수정", description = "자격증을 수정합니다")
     @PutMapping("/{certificateId}")
     public ApiResponse<CertificateRes> update(@PathVariable Long certificateId,
-            @Valid @RequestBody CertificateReq req) {
-        Long userId = 1L;
+                                              @Valid @RequestBody CertificateReq req,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(certificateService.update(req, certificateId, userId));
     }
 
     @Operation(summary = "자격증 삭제", description = "자격증을 삭제합니다")
     @DeleteMapping("/{certificateId}")
-    public ApiResponse<Void> remove(@PathVariable Long certificateId) {
-        Long userId = 1L;
+    public ApiResponse<Void> remove(@PathVariable Long certificateId,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         certificateService.remove(certificateId, userId);
         return ApiResponse.ok(null, "삭제 완료");
     }

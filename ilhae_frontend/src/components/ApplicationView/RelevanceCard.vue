@@ -7,10 +7,10 @@ const props = defineProps({
     id:{type:String, required:true}
 })
 
-const requirements = ref("")
+const relevance = ref("")
 
 onMounted(async () => {
-    requirements.value = await api.getPostingInfo(props.id);
+    relevance.value = await api.getPostingRelevance(props.id);
 })
 
 const emits = defineEmits(["emitCloseCard"]);
@@ -25,7 +25,7 @@ const emitCloseCard = () => {
     <div>
       <button @click.stop="emitCloseCard">X</button>
       <div>
-        <p>{{requirements}}</p>
+        <p>{{relevance}}</p>
       </div>
     </div>
   </OurBox>

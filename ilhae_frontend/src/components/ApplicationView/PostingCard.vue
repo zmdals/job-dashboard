@@ -11,10 +11,14 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(["emitRequestInfo"])
+const emits = defineEmits(["emitRequestInfo", "emitRequestRelevance"])
 
 const emitRequestInfo= () => {
   emits('emitRequestInfo', props.post.id)
+}
+
+const emitRequestRelevance = () => {
+  emits('emitRequestRelevance', props.post.id)
 }
 
 </script>
@@ -27,7 +31,19 @@ const emitRequestInfo= () => {
       {{ props.starred ? "★" : "☆" }}
     </p>
 
-    <div @click.stop="emitRequestInfo">{{ post.id }}</div>
+    <p @click.stop="emitRequestRelevance">75%</p>
+
+    <p @click.stop="emitRequestInfo">{{ post.id }}</p>
 
   </div>
 </template>
+
+<style scoped>
+.postCard {
+  display: flex;
+  flex-direction: row;
+}
+.postCard * {
+  padding: 20px;
+}
+</style>

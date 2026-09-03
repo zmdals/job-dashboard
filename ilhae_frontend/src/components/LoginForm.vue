@@ -14,12 +14,10 @@ const mode = ref(route.query.mode === 'signup' ? 'signup' : 'login')
 const loginEmail = ref('')
 const loginPassword = ref('')
 const rememberLogin = ref(false)
-const signupId = ref('')
 const signupEmail = ref('')
 const signupName = ref('')
 const signupPassword = ref('')
 const errorMessage = ref('')
-const successMessage = ref('')
 
 const heading = computed(() => mode.value === 'login'
   ? { eyebrow: 'WELCOME', title: '다시 만났네요', description: '오늘도 취업했음청년과 함께 시작해요.' }
@@ -39,7 +37,6 @@ watch(
 
 async function handleLogin() {
   errorMessage.value = ''
-  successMessage.value = ''
 
   try {
     await authStore.login(loginEmail.value, loginPassword.value, rememberLogin.value)
@@ -60,19 +57,15 @@ async function handleLogin() {
 
 async function handleSignup() {
   errorMessage.value = ''
-  successMessage.value = ''
 
   try {
     await authStore.signup({
-      id: signupId.value,
       email: signupEmail.value,
       name: signupName.value,
       password: signupPassword.value,
     })
 
-    loginEmail.value = signupEmail.value
-    mode.value = 'login'
-    successMessage.value = '회원가입이 완료되었습니다. 로그인해 주세요.'
+    await router.replace('/home')
   } catch (error) {
     errorMessage.value = error.message || '회원가입에 실패했습니다.'
   }
@@ -92,14 +85,12 @@ async function handleSignup() {
           <button type="button">비밀번호 찾기</button>
         </div>
         <p v-if="errorMessage" class="message error" role="alert">{{ errorMessage }}</p>
-        <p v-if="successMessage" class="message success" role="status">{{ successMessage }}</p>
         <button class="submit" type="submit" :disabled="authStore.loading">
           {{ authStore.loading ? '로그인 중...' : '로그인하기' }}
         </button>
       </form>
 
       <form v-else @submit.prevent="handleSignup">
-        <FormField v-model="signupId" label="아이디" placeholder="사용할 아이디를 입력해 주세요" autocomplete="username" required />
         <FormField v-model="signupEmail" label="이메일" type="email" placeholder="이메일을 입력해 주세요" autocomplete="email" required />
         <FormField v-model="signupName" label="이름" placeholder="이름을 입력해 주세요" autocomplete="name" required />
         <FormField v-model="signupPassword" label="비밀번호" type="password" placeholder="비밀번호를 입력해 주세요" autocomplete="new-password" required />
@@ -172,8 +163,6 @@ async function handleSignup() {
 }
 
 .message.error { color: #e31b23; }
-.message.success { color: #55705b; }
-
 @media (max-width: 760px) {
   .form-side {
     padding: 48px 26px 60px;

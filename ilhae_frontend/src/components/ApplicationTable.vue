@@ -1,8 +1,11 @@
 <script setup>
+import { ref } from 'vue'
 import {
+  APPLICATION_STATUS_GROUPS,
   APPLICATION_STATUS_OPTIONS,
   APPLICATION_STATUS_TRANSITIONS,
 } from '@/constants/applicationStatus'
+import ApplicationPreparationModal from '@/components/LegoBox/ApplicationPreparationModal.vue'
 
 const props = defineProps({
   applications: {
@@ -13,10 +16,8 @@ const props = defineProps({
 
 const emit = defineEmits(['updateStatus', 'delete'])
 
-function formatDate(value) {
-  if (!value) return '—'
-  return String(value).slice(0, 10).replaceAll('-', '.')
-}
+const selectedApplication = ref(null)
+const preparationMode = ref('cover-letter')
 
 function statusOptionsFor(currentStatus) {
   const availableStatuses = new Set([
@@ -34,6 +35,19 @@ function isTerminalStatus(status) {
 function updateStatus(application, event) {
   emit('updateStatus', application, event.target.value)
 }
+
+function canViewInterviewQuestions(status) {
+  return APPLICATION_STATUS_GROUPS['면접 예정'].includes(status)
+}
+
+function openPreparation(application, mode) {
+  selectedApplication.value = application
+  preparationMode.value = mode
+}
+
+function closePreparation() {
+  selectedApplication.value = null
+}
 </script>
 
 <template>
@@ -49,7 +63,17 @@ function updateStatus(application, event) {
         {{ app.companyName || '회사명 미정' }}
       </div>
       <div class="company-meta">{{ app.jobTitle || '채용공고' }}</div>
-      <div class="deadline">지원일 {{ formatDate(app.createdAt) }}</div>
+      <div class="preparation-actions">
+        <button type="button" @click="openPreparation(app, 'cover-letter')">자기소개서</button>
+        <button
+          type="button"
+          :disabled="!canViewInterviewQuestions(app.status)"
+          :title="canViewInterviewQuestions(app.status) ? '' : '면접 예정 단계에서 확인할 수 있습니다.'"
+          @click="openPreparation(app, 'interview')"
+        >
+          예상 면접 질문
+        </button>
+      </div>
       <select
         class="status-select"
         :value="app.status"
@@ -68,6 +92,13 @@ function updateStatus(application, event) {
       <button class="delete-btn" type="button" @click="emit('delete', app.id)">삭제</button>
     </div>
   </div>
+
+  <ApplicationPreparationModal
+    v-if="selectedApplication"
+    :application="selectedApplication"
+    :mode="preparationMode"
+    @close="closePreparation"
+  />
 </template>
 
 <style scoped>
@@ -111,7 +142,7 @@ function updateStatus(application, event) {
 
 .table-row {
     display: grid;
-    grid-template-columns: 1.45fr 1fr 1fr minmax(110px, 1fr) 42px;
+    grid-template-columns: 1.3fr .9fr 1.5fr minmax(110px, 1fr) 42px;
     align-items: center;
     gap: 20px;
     min-height: 78px;
@@ -139,10 +170,38 @@ function updateStatus(application, event) {
     font-size: 11px;
 }
 
-.company-meta,
-.deadline {
+.company-meta {
     color: #999;
     font-size: 11px;
+}
+
+.preparation-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.preparation-actions button {
+  min-height: 32px;
+  padding: 6px 7px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #666;
+  background: #fff;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.preparation-actions button:hover:not(:disabled),
+.preparation-actions button:focus-visible:not(:disabled) {
+  border-color: #e31b23;
+  color: #e31b23;
+}
+
+.preparation-actions button:disabled {
+  color: #bbb;
+  background: #f5f5f5;
+  cursor: not-allowed;
 }
 
 .status-select {

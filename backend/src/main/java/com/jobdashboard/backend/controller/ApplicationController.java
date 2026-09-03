@@ -18,7 +18,7 @@ import java.util.List;
  */
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Application", description = "지원 관리 API")
+@Tag(name = "지원 내역", description = "지원 내역 관리 API")
 public class ApplicationController {
 
     private final ApplicationService applicationService;

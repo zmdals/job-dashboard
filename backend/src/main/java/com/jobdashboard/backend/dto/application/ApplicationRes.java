@@ -18,6 +18,8 @@ public class ApplicationRes {
     private String jobTitle;
     private ApplicationStatus status;
     private String memo;
+    private Boolean hasAnalysis;        // AI 매칭 분석 존재 여부
+    private Boolean hasCoverLetter;     // 자소서 존재 여부
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

@@ -43,7 +43,6 @@ public class JobPosting extends BaseCreatedEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-
     // 엔티티 수정 메서드
     public void update(String title, String url,
                        String jobType, String location, String annualIncome,

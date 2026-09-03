@@ -7,11 +7,7 @@ import com.jobdashboard.backend.entity.JobPosting;
 import com.jobdashboard.backend.entity.User;
 import com.jobdashboard.backend.entity.enums.ApplicationStatus;
 import com.jobdashboard.backend.exception.ResourceNotFoundException;
-import com.jobdashboard.backend.repository.ApplicationRepository;
-import com.jobdashboard.backend.repository.JobPostingRepository;
-import com.jobdashboard.backend.repository.UserRepository;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import com.jobdashboard.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static com.jobdashboard.backend.entity.enums.ApplicationStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +26,16 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final JobPostingRepository jobPostingRepository;
     private final UserRepository userRepository;
+    private final MatchAnalysisRepository matchAnalysisRepository;
+    private final CoverLetterRepository coverLetterRepository;
 
     private static final Map<ApplicationStatus, Set<ApplicationStatus>> VALID_TRANSITIONS = Map.of(
-            ApplicationStatus.PREPARING, Set.of(ApplicationStatus.APPLIED, ApplicationStatus.REJECTED),
-            ApplicationStatus.APPLIED, Set.of(ApplicationStatus.IN_PROGRESS, ApplicationStatus.REJECTED),
-            ApplicationStatus.IN_PROGRESS, Set.of(ApplicationStatus.ACCEPTED, ApplicationStatus.REJECTED)
+            PREPARING,        Set.of(APPLIED, REJECTED),
+            APPLIED,          Set.of(CODING_TEST, FIRST_INTERVIEW, REJECTED),
+            CODING_TEST,      Set.of(FIRST_INTERVIEW, REJECTED),
+            FIRST_INTERVIEW,  Set.of(SECOND_INTERVIEW, FINAL_INTERVIEW, ACCEPTED, REJECTED),
+            SECOND_INTERVIEW, Set.of(FINAL_INTERVIEW, ACCEPTED, REJECTED),
+            FINAL_INTERVIEW,  Set.of(ACCEPTED, REJECTED)
     );
 
     // 유저로 지원내역 전체 조회
@@ -41,7 +44,18 @@ public class ApplicationService {
                 .orElseThrow(() -> new ResourceNotFoundException("유저를 찾을 수 없습니다."));
         return applicationRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
-                .map(ApplicationRes::from)
+                .map(app -> ApplicationRes.builder()
+                        .id(app.getId())
+                        .jobPostingId(app.getJobPosting().getId())
+                        .companyName(app.getJobPosting().getCompany().getName())
+                        .jobTitle(app.getJobPosting().getTitle())
+                        .status(app.getApplicationStatus())
+                        .memo(app.getMemo())
+                        .hasAnalysis(matchAnalysisRepository.existsByApplicationId(app.getId()))
+                        .hasCoverLetter(coverLetterRepository.existsByApplicationId(app.getId()))
+                        .createdAt(app.getCreatedAt())
+                        .updatedAt(app.getUpdatedAt())
+                        .build())
                 .toList();
     }
 

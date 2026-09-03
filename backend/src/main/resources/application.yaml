@@ -5,8 +5,10 @@ server:
 spring:
   config:
     import: optional:file:.env[.properties]
+
   application:
     name: backend
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -17,12 +19,17 @@ spring:
       idle-timeout: 30000         # 30초 뒤 idle 연결 반환
       max-lifetime: 600000        # 10분마다 연결 갱신
       connection-timeout: 20000
+  sql:
+    init:
+      mode: always
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop #update
     show-sql: true
     properties:
       hibernate:
         default_schema: public
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+    defer-datasource-initialization: true

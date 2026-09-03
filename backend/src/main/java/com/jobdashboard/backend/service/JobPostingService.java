@@ -2,8 +2,10 @@ package com.jobdashboard.backend.service;
 
 import com.jobdashboard.backend.dto.jobposting.JobPostingReq;
 import com.jobdashboard.backend.dto.jobposting.JobPostingRes;
+import com.jobdashboard.backend.entity.Company;
 import com.jobdashboard.backend.entity.JobPosting;
 import com.jobdashboard.backend.exception.ResourceNotFoundException;
+import com.jobdashboard.backend.repository.CompanyRepository;
 import com.jobdashboard.backend.repository.JobPostingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.List;
 public class JobPostingService {
 
     private final JobPostingRepository jobPostingRepository;
+    private final CompanyRepository companyRepository;
 
     // 전체 조회 → findAll → stream으로 Response 변환
     public List<JobPostingRes> getAllPostings() {
@@ -35,7 +38,9 @@ public class JobPostingService {
     // 공고 생성 → @Transactional 붙이고 save
     @Transactional
     public JobPostingRes create(JobPostingReq req) {
-        JobPosting jobPosting = req.toEntity();
+        Company company = companyRepository.findById(req.getCompanyId())
+                .orElseThrow(() -> new ResourceNotFoundException("회사를 찾을 수 없습니다."));
+        JobPosting jobPosting = req.toEntity(company);
         JobPosting savedPosting = jobPostingRepository.save(jobPosting);
         return JobPostingRes.from(savedPosting);
     }
@@ -45,8 +50,11 @@ public class JobPostingService {
     public JobPostingRes update(JobPostingReq req, Long postingId) {
         JobPosting jobPosting = jobPostingRepository.findById(postingId)
                 .orElseThrow(() -> new ResourceNotFoundException("공고를 찾을 수 없습니다."));
-        jobPosting.update(req.getTitle(), req.getCompanyName(), req.getUrl(), req.getJobType(), req.getLocation(),
-                req.getAnnualIncome(), req.getDeadline(), req.getDescription());
+
+        // company는 안 바꿈 — 공고의 회사가 바뀌는 건 삭제 후 재등록이 맞음
+        jobPosting.update(req.getTitle(), req.getUrl(), req.getJobType(),
+                req.getLocation(), req.getAnnualIncome(),
+                req.getDeadline(), req.getDescription());
         return JobPostingRes.from(jobPosting);
     }
 

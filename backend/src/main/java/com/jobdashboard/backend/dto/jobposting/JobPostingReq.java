@@ -1,7 +1,9 @@
 package com.jobdashboard.backend.dto.jobposting;
 
+import com.jobdashboard.backend.entity.Company;
 import com.jobdashboard.backend.entity.JobPosting;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,8 +18,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class JobPostingReq {
 
-    @NotBlank
-    private String companyName;
+    @NotNull
+    private Long companyId;
 
     @NotBlank
     private String title;
@@ -35,9 +37,9 @@ public class JobPostingReq {
     private String description;
 
     // toEntity() 메서드로 엔티티 변환
-    public JobPosting toEntity(){
+    public JobPosting toEntity(Company company){
         return JobPosting.builder()
-                .companyName(this.companyName)
+                .company(company)
                 .title(this.title)
                 .url(this.url)
                 .jobType(this.jobType)

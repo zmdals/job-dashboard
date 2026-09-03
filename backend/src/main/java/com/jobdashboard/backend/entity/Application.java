@@ -32,7 +32,7 @@ public class Application extends BaseEntity {
 
     /**
      * 지원 상태 흐름:
-     * PREPARING → APPLIED → INTERVIEW → ACCEPTED / REJECTED
+     * PREPARING → APPLIED → IN_PROGRESS → ACCEPTED / REJECTED
      */
     @Column(name = "application_status", nullable = false)
     @Enumerated(EnumType.STRING)

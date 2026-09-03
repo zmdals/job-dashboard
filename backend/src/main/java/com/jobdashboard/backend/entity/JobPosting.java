@@ -42,4 +42,18 @@ public class JobPosting extends BaseCreatedEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+
+    // 엔티티 수정 메서드
+    public void update(String title, String companyName, String url,
+                       String jobType, String location, String annualIncome,
+                       LocalDate deadline, String description) {
+        this.title = title;
+        this.companyName = companyName;
+        this.url = url;
+        this.jobType = jobType;
+        this.location = location;
+        this.annualIncome = annualIncome;
+        this.deadline = deadline;
+        this.description = description;
+    }
 }

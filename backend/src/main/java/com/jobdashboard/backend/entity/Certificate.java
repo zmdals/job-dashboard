@@ -35,12 +35,16 @@ public class Certificate extends BaseCreatedEntity {
     @Column(name = "cert_name", nullable = false)
     private String certName;
 
-    //발급기관
+    // 발급기관
     @Column(nullable = false)
     private String issuer;
 
-    //취득일
+    // 취득일
     @Column(name = "acquired_date")
     private LocalDate acquiredDate;
+
+    // 어학 점수 - 어학 자격증이 아니면 Null
+    @Column(name = "language_score")
+    private Integer languageScore;
 
 }

@@ -32,7 +32,7 @@ public class JobPostingController {
         return ApiResponse.ok(jobPostingService.getPosting(postingId));
     }
 
-    @Operation(summary = "공고 등록", description = "새 채용공고를 등록합니다 (companyName, title 필수)")
+    @Operation(summary = "공고 등록", description = "새 채용공고를 등록합니다 (company, title 필수)")
     @PostMapping
     public ApiResponse<JobPostingRes> create(@Valid @RequestBody JobPostingReq req) {
         return ApiResponse.ok(jobPostingService.create(req));

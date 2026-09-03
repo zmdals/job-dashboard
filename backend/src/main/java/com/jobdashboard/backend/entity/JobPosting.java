@@ -21,8 +21,9 @@ public class JobPosting extends BaseCreatedEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "company_name", nullable = false)
-    private String companyName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @Column(nullable = false)
     private String title;
@@ -44,11 +45,10 @@ public class JobPosting extends BaseCreatedEntity {
 
 
     // 엔티티 수정 메서드
-    public void update(String title, String companyName, String url,
+    public void update(String title, String url,
                        String jobType, String location, String annualIncome,
                        LocalDate deadline, String description) {
         this.title = title;
-        this.companyName = companyName;
         this.url = url;
         this.jobType = jobType;
         this.location = location;

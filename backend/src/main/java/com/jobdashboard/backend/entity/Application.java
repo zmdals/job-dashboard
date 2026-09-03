@@ -43,5 +43,6 @@ public class Application extends BaseEntity {
     private LocalDate appliedDate;
 
     // 대시보드에서 사용자의 메모
+    @Column(columnDefinition = "TEXT")
     private String memo;
 }

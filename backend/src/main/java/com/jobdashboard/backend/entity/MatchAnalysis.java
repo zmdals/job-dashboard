@@ -26,7 +26,7 @@ public class MatchAnalysis extends BaseCreatedEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "application_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Application application;
@@ -48,5 +48,18 @@ public class MatchAnalysis extends BaseCreatedEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "ai_status")
     private AiStatus aiStatus = PENDING;
+
+    // ===== AI 분석 결과 - mock data
+    @Column(columnDefinition = "TEXT")
+    private String strengths;      // JSON 문자열 ["Java 3년", "정보처리기사"]
+
+    @Column(columnDefinition = "TEXT")
+    private String weaknesses;     // JSON 문자열 ["Python 경험 없음"]
+
+    @Column(columnDefinition = "TEXT")
+    private String recommendation; // AI 추천 메시지
+
+    @Column(name = "included_cover_letter")
+    private Boolean includedCoverLetter; // 자소서 포함 분석 여부
 
 }

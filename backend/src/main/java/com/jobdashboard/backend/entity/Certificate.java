@@ -44,6 +44,8 @@ public class Certificate extends BaseCreatedEntity {
     private LocalDate acquiredDate;
 
     // 어학 점수 - 어학 자격증이 아니면 Null
+    // certName(자격증 이름)이 TOEIC, JLPT 등 AI가 알아서 이름을 보고 점수를 해석하는 구조
+    //발표 때 "AI가 자격증명과 점수를 조합해서 판단한다"고 설명할 포인트
     @Column(name = "language_score")
     private Integer languageScore;
 

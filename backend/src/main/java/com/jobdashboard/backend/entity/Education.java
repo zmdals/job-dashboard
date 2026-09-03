@@ -19,7 +19,8 @@ import lombok.*;
 @Builder
 public class Education extends BaseCreatedEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -40,7 +41,7 @@ public class Education extends BaseCreatedEntity {
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    //졸업, 수료 상태가 아니면 없을 수 있음 = null.
+    // 졸업, 수료 상태가 아니면 없을 수 있음 = null.
     // LocalDate 쓰고 프론트에서만 월까지 받기
     @Column(name = "end_date")
     private LocalDate endDate;
@@ -50,4 +51,15 @@ public class Education extends BaseCreatedEntity {
     @Column(name = "status", nullable = false)
     private EducationStatus educationStatus;
 
+    // 학력사항 수정
+    public void update(String schoolName, String degree, String major,
+            LocalDate startDate, LocalDate endDate,
+            EducationStatus educationStatus) {
+        this.schoolName = schoolName;
+        this.degree = degree;
+        this.major = major;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.educationStatus = educationStatus;
+    }
 }

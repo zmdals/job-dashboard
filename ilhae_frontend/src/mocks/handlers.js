@@ -1,7 +1,10 @@
 import { delay, http, HttpResponse } from 'msw'
-import { APPLICATION_STATUSES } from './mockData'
 import { getDb, nextId, saveDb } from './db'
 import { createMockJwt, readMockJwt } from './auth'
+import {
+  APPLICATION_STATUS_TRANSITIONS,
+  APPLICATION_STATUS_VALUES,
+} from '@/constants/applicationStatus'
 
 const API = '/api'
 
@@ -68,6 +71,10 @@ function currentUser(request, db) {
   }
 
   return db.users.find((user) => user.id === payload.sub) ?? null
+}
+
+function currentApplicationUser(request, db) {
+  return currentUser(request, db) ?? db.users[0] ?? null
 }
 
 export const handlers = [
@@ -308,7 +315,7 @@ export const handlers = [
     await latency()
 
     const db = getDb()
-    const user = currentUser(request, db)
+    const user = currentApplicationUser(request, db)
 
     if (!user) {
       return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
@@ -327,7 +334,7 @@ export const handlers = [
       await latency()
 
       const db = getDb()
-      const user = currentUser(request, db)
+      const user = currentApplicationUser(request, db)
 
       if (!user) {
         return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
@@ -363,7 +370,7 @@ export const handlers = [
         id: nextId('application'),
         userId: user.id,
         postingId: posting.id,
-        status: 'APPLIED',
+        status: 'PREPARING',
         appliedAt: now,
         updatedAt: now,
       }
@@ -548,15 +555,16 @@ export const handlers = [
       await latency()
 
       const db = getDb()
-      const user = currentUser(request, db)
+      const user = currentApplicationUser(request, db)
 
       if (!user) {
         return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
       }
 
-      const { status, memo } = await request.json()
+      const { applicationStatus, status: legacyStatus, memo } = await request.json()
+      const status = applicationStatus ?? legacyStatus
 
-      if (!APPLICATION_STATUSES.includes(status)) {
+      if (!APPLICATION_STATUS_VALUES.includes(status)) {
         return error(
           400,
           'INVALID_APPLICATION_STATUS',
@@ -580,6 +588,16 @@ export const handlers = [
         return error(403, 'FORBIDDEN', '지원 정보를 수정할 수 없습니다.')
       }
 
+      const allowedStatuses = APPLICATION_STATUS_TRANSITIONS[application.status] ?? []
+
+      if (!allowedStatuses.includes(status)) {
+        return error(
+          409,
+          'INVALID_APPLICATION_STATUS_TRANSITION',
+          `${application.status}에서 ${status}(으)로 상태를 변경할 수 없습니다.`,
+        )
+      }
+
       application.status = status
       application.memo = memo ?? null
       application.updatedAt = new Date().toISOString()
@@ -595,7 +613,7 @@ export const handlers = [
       await latency()
 
       const db = getDb()
-      const user = currentUser(request, db)
+      const user = currentApplicationUser(request, db)
 
       if (!user) {
         return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')

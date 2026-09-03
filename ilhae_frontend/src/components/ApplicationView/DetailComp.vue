@@ -76,12 +76,84 @@ const REPORTS_BY_COMPANY_ID = {
       },
     ],
   },
+  4: {
+    companyName: 'Green Finance',
+    resources: [
+      {
+        type: '특허',
+        title: '금융 데이터 기반 고객 분석 기술',
+        description: '데이터 분석 역량과 연결되는 Green Finance의 관련 기술 자료입니다.',
+        relevance: 91,
+      },
+      {
+        type: '논문',
+        title: '설명 가능한 금융 데이터 모델',
+        description: '금융 데이터 분석 직무와 관련된 연구 주제를 선별했습니다.',
+        relevance: 86,
+      },
+      {
+        type: '보고서',
+        title: '2026 핀테크 산업 전망',
+        description: '핀테크 시장과 기업의 사업 방향을 이해하는 데 도움이 되는 자료입니다.',
+        relevance: 79,
+      },
+    ],
+  },
+  5: {
+    companyName: 'Product Studio',
+    resources: [
+      {
+        type: '사례연구',
+        title: '사용자 문제 중심의 제품 설계',
+        description: '제품 기획 프로젝트 경험과 연결되는 Product Studio의 사례입니다.',
+        relevance: 93,
+      },
+      {
+        type: '논문',
+        title: '데이터 기반 제품 의사결정',
+        description: '제품 지표와 사용자 분석에 관련된 연구 주제를 선별했습니다.',
+        relevance: 88,
+      },
+      {
+        type: '보고서',
+        title: '2026 디지털 제품 트렌드',
+        description: '제품 조직과 시장의 변화를 이해하는 데 도움이 되는 자료입니다.',
+        relevance: 82,
+      },
+    ],
+  },
+  6: {
+    companyName: 'Mobility One',
+    resources: [
+      {
+        type: '사례연구',
+        title: '도시 이동 경험 사용자 조사',
+        description: '사용자 리서치 경험과 연결되는 Mobility One의 조사 사례입니다.',
+        relevance: 89,
+      },
+      {
+        type: '논문',
+        title: '모빌리티 서비스 사용성 연구',
+        description: 'UX 리서치 직무와 관련된 연구 주제를 AI가 선별했습니다.',
+        relevance: 84,
+      },
+      {
+        type: '보고서',
+        title: '2026 스마트 모빌리티 전망',
+        description: '모빌리티 산업과 기업의 방향을 이해하는 데 도움이 되는 자료입니다.',
+        relevance: 77,
+      },
+    ],
+  },
 }
 
 const MOCK_COMPANY_ALIASES = {
   'company-001': 1,
   'company-002': 2,
   'company-003': 3,
+  'company-004': 4,
+  'company-005': 5,
+  'company-006': 6,
 }
 
 const companyId = computed(() => String(route.params.companyId))

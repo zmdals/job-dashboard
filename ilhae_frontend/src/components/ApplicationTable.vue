@@ -1,33 +1,73 @@
 <script setup>
-defineProps({
+import {
+  APPLICATION_STATUS_OPTIONS,
+  APPLICATION_STATUS_TRANSITIONS,
+} from '@/constants/applicationStatus'
+
+const props = defineProps({
   applications: {
     type: Array,
     required: true,
   },
 })
 
-const statusOptions = ['서류준비', '지원완료', '코딩테스트 (필기시험)', '1차면접', '2차면접', '최종면접', '탈락', '최종합격']
+const emit = defineEmits(['updateStatus', 'delete'])
+
+function formatDate(value) {
+  if (!value) return '—'
+  return String(value).slice(0, 10).replaceAll('-', '.')
+}
+
+function statusOptionsFor(currentStatus) {
+  const availableStatuses = new Set([
+    currentStatus,
+    ...(APPLICATION_STATUS_TRANSITIONS[currentStatus] ?? []),
+  ])
+
+  return APPLICATION_STATUS_OPTIONS.filter(({ value }) => availableStatuses.has(value))
+}
+
+function isTerminalStatus(status) {
+  return (APPLICATION_STATUS_TRANSITIONS[status] ?? []).length === 0
+}
+
+function updateStatus(application, event) {
+  emit('updateStatus', application, event.target.value)
+}
 </script>
 
 <template>
-    <div class="app-head">
-        <h3>내 지원 목록</h3>
-        <span>총 {{ applications.length }}개</span>
+  <div class="app-head">
+    <h3>내 지원 목록</h3>
+    <span>총 {{ props.applications.length }}개</span>
+  </div>
+  <div class="app-table">
+    <p v-if="!props.applications.length" class="empty-state">표시할 지원 내역이 없습니다.</p>
+    <div v-for="app in props.applications" v-else :key="app.id" class="table-row">
+      <div class="company-name">
+        <span class="company-logo">{{ app.companyName?.slice(0, 1) || '?' }}</span>
+        {{ app.companyName || '회사명 미정' }}
+      </div>
+      <div class="company-meta">{{ app.jobTitle || '채용공고' }}</div>
+      <div class="deadline">지원일 {{ formatDate(app.createdAt) }}</div>
+      <select
+        class="status-select"
+        :value="app.status"
+        :aria-label="`${app.companyName || '회사'} 지원 상태`"
+        :disabled="isTerminalStatus(app.status)"
+        @change="updateStatus(app, $event)"
+      >
+        <option
+          v-for="option in statusOptionsFor(app.status)"
+          :key="option.value"
+          :value="option.value"
+        >
+          {{ option.label }}
+        </option>
+      </select>
+      <button class="delete-btn" type="button" @click="emit('delete', app.id)">삭제</button>
     </div>
-    <div class="app-table">
-        <div class="table-row" v-for="app in applications" :key="app.id">
-            <div class="company-name">
-                <span class="company-logo">{{ app.company?.slice(0, 1) }}</span>
-                {{ app.company }}
-            </div>
-            <div class="company-meta">{{ app.role }}</div>
-            <div class="deadline">지원일 {{ app.announceDate }}</div>
-            <select class="status-select" v-model="app.status">
-                <option v-for="opt in statusOptions" :key="opt" :value="opt">{{ opt }}</option>
-            </select>
-            <button class="delete-btn" type="button">삭제</button>
-        </div>
-    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -58,6 +98,15 @@ const statusOptions = ['서류준비', '지원완료', '코딩테스트 (필기�
     padding: 0 24px;
     border-top: 1px solid #333;
     background: #fff;
+}
+
+.empty-state {
+  margin: 0;
+  padding: 42px 22px;
+  border-bottom: 1px solid #e7e7e7;
+  color: #999;
+  font-size: 12px;
+  text-align: center;
 }
 
 .table-row {
@@ -109,6 +158,12 @@ const statusOptions = ['서류준비', '지원완료', '코딩테스트 (필기�
 .status-select:focus {
     border-color: #e31b23;
     outline: 0;
+}
+
+.status-select:disabled {
+  color: #999;
+  background: #f5f5f5;
+  cursor: default;
 }
 
 .delete-btn {

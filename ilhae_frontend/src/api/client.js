@@ -267,7 +267,7 @@ export const api = {
   updateApplicationStatus(applicationId, status, memo = null) {
     return request(`/applications/${applicationId}/status`, {
       method: "PATCH",
-      body: JSON.stringify({ status, memo }),
+      body: JSON.stringify({ applicationStatus: status, memo }),
     });
   },
 

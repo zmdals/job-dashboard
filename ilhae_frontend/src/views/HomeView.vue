@@ -1,77 +1,104 @@
 <script setup>
-import ApplicationTable from '@/components/ApplicationTable.vue';
-import StatCard from '@/components/StatCard.vue';
-import {ref, computed} from 'vue';
-const applications = ref([
-    {
-  id: 1,
-  status: '1차면접',
-  company: '네이버',
-  role: '프론트엔드',
-  announceDate: '2026-09-01',
-  nextSchedule: '2026-09-10 면접',
-},
-    {
-  id: 2,
-  status: '지원완료',
-  company: '카카오',
-  role: '백엔드',
-  announceDate: '2026-08-25',
-  nextSchedule: null,
-},
-    {
-  id: 3,
-  status: '최종합격',
-  company: '토스',
-  role: '풀스택',
-  announceDate: '2026-08-15',
-  nextSchedule: '2026-09-05 입사 예정',
-},
+import { computed, onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import ApplicationTable from '@/components/ApplicationTable.vue'
+import StatCard from '@/components/StatCard.vue'
+import { APPLICATION_STATUS_GROUPS } from '@/constants/applicationStatus'
+import { useMeStore } from '@/stores/meStore'
 
-])
+const meStore = useMeStore()
+const { applications, loading, error } = storeToRefs(meStore)
 
 const selectedFilter = ref('전체 지원')
-function selectFilter(label) {
-    selectedFilter.value = label
-}
 
-const filterStatusMap = {
-    '진행중': ['서류준비','지원완료','코딩테스트 (필기시험)'],
-    '면접 예정': ['1차면접', '2차면접', '최종면접'],
-    '최종합격': ['최종합격'],
+function selectFilter(label) {
+  selectedFilter.value = label
 }
 
 const stats = computed(() => [
-    { label: '전체 지원', value: applications.value.length },
-    { label: '진행중', value: applications.value.filter(app => filterStatusMap['진행중'].includes(app.status)).length },
-    { label: '면접 예정', value: applications.value.filter(app => filterStatusMap['면접 예정'].includes(app.status)).length },
-    { label: '최종합격', value: applications.value.filter(app => filterStatusMap['최종합격'].includes(app.status)).length },
+  { label: '전체 지원', value: applications.value.length },
+  {
+    label: '진행중',
+    value: applications.value.filter((app) => APPLICATION_STATUS_GROUPS.진행중.includes(app.status))
+      .length,
+  },
+  {
+    label: '면접 예정',
+    value: applications.value.filter((app) =>
+      APPLICATION_STATUS_GROUPS['면접 예정'].includes(app.status),
+    ).length,
+  },
+  {
+    label: '최종합격',
+    value: applications.value.filter((app) => APPLICATION_STATUS_GROUPS.최종합격.includes(app.status))
+      .length,
+  },
 ])
 
+const sortedApplications = computed(() =>
+  [...applications.value].sort((a, b) => {
+    const aTime = Date.parse(a.updatedAt ?? a.createdAt ?? '') || 0
+    const bTime = Date.parse(b.updatedAt ?? b.createdAt ?? '') || 0
+    return bTime - aTime
+  }),
+)
+
 const filteredApplications = computed(() => {
-    if (selectedFilter.value === '전체 지원') {
-        return applications.value
-    }
-    const matchStatuses = filterStatusMap[selectedFilter.value] || []
-    return applications.value.filter(app => matchStatuses.includes(app.status))
+  if (selectedFilter.value === '전체 지원') {
+    return sortedApplications.value
+  }
+
+  const matchStatuses = APPLICATION_STATUS_GROUPS[selectedFilter.value] || []
+  return sortedApplications.value.filter((app) => matchStatuses.includes(app.status))
 })
+
+onMounted(() => {
+  meStore.fetchApplications().catch(() => {})
+})
+
+async function updateStatus(application, status) {
+  try {
+    await meStore.updateApplicationStatus(application.id, status, application.memo)
+  } catch {
+    return
+  }
+}
+
+async function removeApplication(applicationId) {
+  try {
+    await meStore.deleteApplication(applicationId)
+  } catch {
+    return
+  }
+}
 </script>
 
 <template>
+  <main>
     <div class="applicationStatus">
-        <h3>지원현황</h3>
-        <p>나의 취업 여정을 한눈에 확인해 보세요.</p>
+      <h3>지원현황</h3>
+      <p>나의 취업 여정을 한눈에 확인해 보세요.</p>
     </div>
     <div class="status">
-        <StatCard
-            v-for="s in stats"
-            :key="s.label"
-            v-bind="s"
-            :active="selectedFilter === s.label"
-            @click="selectFilter(s.label)"
-        ></StatCard>
+      <StatCard
+        v-for="s in stats"
+        :key="s.label"
+        v-bind="s"
+        :active="selectedFilter === s.label"
+        @click="selectFilter(s.label)"
+      />
     </div>
-    <ApplicationTable :applications="filteredApplications"/>
+    <p v-if="loading && !applications.length" class="list-state">지원 내역을 불러오는 중입니다.</p>
+    <p v-else-if="error && !applications.length" class="list-state error">
+      지원 내역을 불러오지 못했습니다.
+    </p>
+    <ApplicationTable
+      v-else
+      :applications="filteredApplications"
+      @update-status="updateStatus"
+      @delete="removeApplication"
+    />
+  </main>
 </template>
 
 <style scoped>
@@ -108,6 +135,19 @@ const filteredApplications = computed(() => {
 }
 
 .status :deep(.stat-card:first-child .value) {
-    color: #e31b23;
+  color: #e31b23;
+}
+
+.list-state {
+  max-width: 1012px;
+  margin: 0 auto 80px;
+  padding: 42px 24px;
+  border-top: 1px solid #333;
+  color: #999;
+  text-align: center;
+}
+
+.list-state.error {
+  color: #e31b23;
 }
 </style>

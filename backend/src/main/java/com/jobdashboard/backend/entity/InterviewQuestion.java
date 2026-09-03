@@ -8,6 +8,8 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import static com.jobdashboard.backend.entity.enums.AiStatus.PENDING;
+
 /**
  * 면접 질문 엔티티
  * FK → Application · AI 확장 지점
@@ -41,9 +43,10 @@ public class InterviewQuestion extends BaseCreatedEntity {
     @Column(nullable = false)
     private InterviewCategory category;
 
-    // AI 응답 상태 - 면접 질문 생성 요청
+    // AI 응답 상태 - 면접 질문 생성 요청 = 기본값 PENDING
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "ai_status")
-    private AiStatus aiStatus;
+    private AiStatus aiStatus = PENDING;
 
 }

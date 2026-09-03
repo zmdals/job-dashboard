@@ -39,11 +39,13 @@ public class CoverLetter extends BaseCreatedEntity {
     private String aiFeedback;
 
     // AI 응답 상태 - 자소서 피드백 요청
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "ai_status")
     private AiStatus aiStatus = PENDING;
 
     // Java + DB 기본값 1 보장
+    @Builder.Default
     @Column(columnDefinition = "INTEGER DEFAULT 1")
     private Integer version = 1;
 

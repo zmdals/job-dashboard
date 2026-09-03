@@ -19,6 +19,8 @@ public class JobPostingRes {
 
     private Long id;
 
+    private Long companyId;
+
     private String companyName;
 
     private String title;
@@ -39,7 +41,8 @@ public class JobPostingRes {
     public static JobPostingRes from(JobPosting jobPosting){
         return JobPostingRes.builder()
                 .id(jobPosting.getId())
-                .companyName(jobPosting.getCompanyName())
+                .companyId(jobPosting.getCompany().getId())
+                .companyName(jobPosting.getCompany().getName())
                 .title(jobPosting.getTitle())
                 .url(jobPosting.getUrl())
                 .jobType(jobPosting.getJobType())

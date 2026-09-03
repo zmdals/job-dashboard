@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "pinia": "^3.0.4",
+    "swagger-ui-dist": "^5.32.14",
     "vue": "^3.5.32",
     "vue-router": "^5.0.4"
   },
@@ -25,6 +26,7 @@
     "eslint-plugin-oxlint": "~1.60.0",
     "eslint-plugin-vue": "~10.8.0",
     "globals": "^17.5.0",
+    "msw": "^2.15.0",
     "npm-run-all2": "^8.0.4",
     "oxfmt": "^0.45.0",
     "oxlint": "~1.60.0",
@@ -33,5 +35,10 @@
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

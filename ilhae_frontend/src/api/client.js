@@ -106,6 +106,11 @@ export const api = {
     return request(`/postings/${postingId}`);
   },
 
+  // 현재 사용자와 공고의 AI 적합도 분석
+  getPostingRelevance(postingId) {
+    return request(`/postings/${postingId}/relevance`);
+  },
+
   // 공고 등록 (companyId, title 필수)
   createPosting(payload) {
     return request("/postings", {

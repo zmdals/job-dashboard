@@ -27,7 +27,7 @@ const activeTab = ref('all')
 const currentPage = ref(1)
 const selectedPosting = ref(null)
 const infoPostingId = ref(null)
-const relevancePosting = ref(null)
+const relevancePostingId = ref(null)
 
 const filteredPostings = computed(() => {
   if (activeTab.value === 'starred') {
@@ -74,6 +74,16 @@ watch(
         return
       }
     }
+  },
+  { immediate: true },
+)
+
+watch(
+  () => visiblePostings.value.map((posting) => posting.id),
+  async (postingIds) => {
+    await Promise.allSettled(
+      postingIds.map((postingId) => postingsStore.ensurePostingScore(postingId)),
+    )
   },
   { immediate: true },
 )
@@ -130,14 +140,12 @@ async function applySelected() {
             v-for="posting in visiblePostings"
             :key="posting.id"
             :post="posting"
-            :score="
-              postingsStore.getCompanyRelevance(posting.companyId ?? posting.company?.id).score
-            "
+            :score="postingsStore.getPostingScore(posting.id)"
             :starred="meStore.isStarred(posting.id)"
             :applied="meStore.isApplied(posting.id)"
             @emit-request-detail="selectedPosting = posting"
             @emit-request-info="infoPostingId = $event"
-            @emit-request-relevance="relevancePosting = posting"
+            @emit-request-relevance="relevancePostingId = $event"
             @emit-toggle-star="toggleStar"
             @emit-apply="apply"
           />
@@ -164,11 +172,9 @@ async function applySelected() {
       @emit-close-card="infoPostingId = null"
     />
     <RelevanceCard
-      v-if="relevancePosting"
-      :company-id="relevancePosting.companyId ?? relevancePosting.company?.id"
-      :company-name="relevancePosting.companyName ?? relevancePosting.company?.name"
-      :job-title="relevancePosting.title"
-      @emit-close-card="relevancePosting = null"
+      v-if="relevancePostingId !== null"
+      :id="relevancePostingId"
+      @emit-close-card="relevancePostingId = null"
     />
   </main>
 </template>

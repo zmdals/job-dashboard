@@ -2,76 +2,12 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { api } from '@/api/client'
 
-const DEMO_RELEVANCE_BY_COMPANY_ID = {
-  1: {
-    score: 86,
-    matchedSkills: ['서비스 기획', '데이터 분석'],
-    missingSkills: ['경력 요건'],
-    summary: '핵심 직무 역량과 프로젝트 경험이 잘 맞습니다.',
-  },
-  2: {
-    score: 74,
-    matchedSkills: ['프론트엔드 개발', '협업 경험'],
-    missingSkills: ['대규모 서비스 경험'],
-    summary: '기술 역량이 대체로 일치하며 실무 경험 보완이 필요합니다.',
-  },
-  3: {
-    score: 68,
-    matchedSkills: ['백엔드 개발', 'API 설계'],
-    missingSkills: ['클라우드 운영'],
-    summary: '기본 역량은 일치하지만 인프라 경험을 보완하면 좋습니다.',
-  },
-  4: {
-    score: 79,
-    matchedSkills: ['데이터 분석', '문제 해결'],
-    missingSkills: ['산업 도메인 경험'],
-    summary: '분석 역량과 문제 해결 경험의 관련성이 높습니다.',
-  },
-  5: {
-    score: 82,
-    matchedSkills: ['제품 기획', '사용자 분석'],
-    missingSkills: ['정량 성과'],
-    summary: '제품 관점의 경험이 공고와 높은 관련성을 보입니다.',
-  },
-  6: {
-    score: 71,
-    matchedSkills: ['사용자 조사', '프로젝트 경험'],
-    missingSkills: ['리서치 방법론'],
-    summary: '관련 프로젝트를 보유했으며 전문 방법론 보완이 필요합니다.',
-  },
-  'company-001': {
-    score: 86,
-    matchedSkills: ['Vue', 'JavaScript'],
-    missingSkills: ['TypeScript'],
-    summary: '프론트엔드 핵심 역량이 공고와 잘 맞습니다.',
-  },
-  'company-002': {
-    score: 74,
-    matchedSkills: ['Python', 'API'],
-    missingSkills: ['Docker'],
-    summary: '백엔드 기본 역량이 공고와 대체로 일치합니다.',
-  },
-  'company-003': {
-    score: 68,
-    matchedSkills: ['JavaScript', 'CSS'],
-    missingSkills: ['Vue 실무 경험'],
-    summary: '기초 웹 역량을 보유했으며 프레임워크 경험 보완이 필요합니다.',
-  },
-}
-
-const DEFAULT_DEMO_RELEVANCE = {
-  score: 75,
-  matchedSkills: ['직무 관련 프로젝트', '협업 경험'],
-  missingSkills: ['실무 경험'],
-  summary: '보유 경험과 공고의 주요 역량이 대체로 일치합니다.',
-}
-
 export const usePostingsStore = defineStore('postings', () => {
   const postings = ref([])
   const selectedPosting = ref(null)
-  const relevanceByCompanyId = ref({
-    ...DEMO_RELEVANCE_BY_COMPANY_ID,
-  })
+  const relevance = ref(null)
+  const relevanceByPostingId = ref({})
+  const scoreByPostingId = ref({})
   const info = ref(null)
   const pagination = ref({
     totalElements: 0,
@@ -89,6 +25,7 @@ export const usePostingsStore = defineStore('postings', () => {
   const hasLoadedPostings = ref(false)
   let pendingRequests = 0
   const postingsRequests = new Map()
+  const relevanceRequests = new Map()
 
   const postingCount = computed(() => pagination.value.totalElements)
 
@@ -96,8 +33,34 @@ export const usePostingsStore = defineStore('postings', () => {
     return postings.value.find((posting) => String(posting.id) === String(postingId)) ?? null
   }
 
-  function getCompanyRelevance(companyId) {
-    return relevanceByCompanyId.value[String(companyId)] ?? DEFAULT_DEMO_RELEVANCE
+  function extractScore(value) {
+    if (typeof value === 'number') return value
+
+    return (
+      value?.score ??
+      value?.relevanceScore ??
+      value?.aiFitScore ??
+      value?.matchScore ??
+      value?.passProbability ??
+      value?.relevance?.score ??
+      null
+    )
+  }
+
+  function cachePostingScore(postingId, value) {
+    const score = extractScore(value)
+
+    if (score !== null && score !== undefined) {
+      scoreByPostingId.value[String(postingId)] = score
+    }
+  }
+
+  function getPostingScore(postingId) {
+    return scoreByPostingId.value[String(postingId)] ?? null
+  }
+
+  function getRelevance(postingId) {
+    return relevanceByPostingId.value[String(postingId)] ?? null
   }
 
   function updatePostingPageCaches(posting) {
@@ -178,6 +141,7 @@ export const usePostingsStore = defineStore('postings', () => {
 
       postingPages.value[key] = pageData
       usePostingPage(pageData)
+      pageData.content.forEach((posting) => cachePostingScore(posting.id, posting))
       hasLoadedPostings.value = true
       return postings.value
     })
@@ -206,6 +170,7 @@ export const usePostingsStore = defineStore('postings', () => {
   async function fetchPosting(postingId) {
     return run(async () => {
       selectedPosting.value = await api.getPosting(postingId)
+      cachePostingScore(postingId, selectedPosting.value)
 
       const index = postings.value.findIndex((posting) => String(posting.id) === String(postingId))
 
@@ -223,6 +188,7 @@ export const usePostingsStore = defineStore('postings', () => {
     return run(async () => {
       const posting = await api.createPosting(payload)
       postings.value.push(posting)
+      cachePostingScore(posting.id, posting)
       selectedPosting.value = posting
       invalidatePostingPages()
       return posting
@@ -232,6 +198,7 @@ export const usePostingsStore = defineStore('postings', () => {
   async function updatePosting(postingId, payload) {
     return run(async () => {
       const posting = await api.updatePosting(postingId, payload)
+      cachePostingScore(postingId, posting)
       const index = postings.value.findIndex((item) => String(item.id) === String(postingId))
 
       if (index >= 0) {
@@ -259,8 +226,54 @@ export const usePostingsStore = defineStore('postings', () => {
         selectedPosting.value = null
       }
 
+      delete scoreByPostingId.value[String(postingId)]
+      delete relevanceByPostingId.value[String(postingId)]
+
       invalidatePostingPages()
     })
+  }
+
+  async function fetchRelevance(postingId) {
+    return run(async () => {
+      const result = await api.getPostingRelevance(postingId)
+      const key = String(postingId)
+
+      relevanceByPostingId.value[key] = result
+      cachePostingScore(postingId, result)
+      relevance.value = result
+
+      return result
+    })
+  }
+
+  function ensureRelevance(postingId) {
+    const key = String(postingId)
+    const cached = relevanceByPostingId.value[key]
+
+    if (cached) {
+      relevance.value = cached
+      return Promise.resolve(cached)
+    }
+
+    if (!relevanceRequests.has(key)) {
+      const request = fetchRelevance(postingId).finally(() => {
+        relevanceRequests.delete(key)
+      })
+
+      relevanceRequests.set(key, request)
+    }
+
+    return relevanceRequests.get(key)
+  }
+
+  function ensurePostingScore(postingId) {
+    const cachedScore = getPostingScore(postingId)
+
+    if (cachedScore !== null) {
+      return Promise.resolve(cachedScore)
+    }
+
+    return ensureRelevance(postingId).then((result) => extractScore(result))
   }
 
   async function fetchInfo(postingId) {
@@ -275,7 +288,9 @@ export const usePostingsStore = defineStore('postings', () => {
   return {
     postings,
     selectedPosting,
-    relevanceByCompanyId,
+    relevance,
+    relevanceByPostingId,
+    scoreByPostingId,
     info,
     pagination,
     postingPages,
@@ -284,13 +299,17 @@ export const usePostingsStore = defineStore('postings', () => {
     hasLoadedPostings,
     postingCount,
     getPostingById,
-    getCompanyRelevance,
+    getPostingScore,
+    getRelevance,
     fetchPostings,
     ensurePostings,
     fetchPosting,
     createPosting,
     updatePosting,
     deletePosting,
+    fetchRelevance,
+    ensureRelevance,
+    ensurePostingScore,
     fetchInfo,
   }
 })

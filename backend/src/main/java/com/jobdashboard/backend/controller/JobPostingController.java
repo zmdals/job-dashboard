@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +24,13 @@ public class JobPostingController {
 
     private final JobPostingService jobPostingService;
 
-    @Operation(summary = "전체 공고 조회", description = "등록된 모든 채용공고를 조회합니다")
+    @Operation(summary = "전체 공고 조회", description = "등록된 모든 채용공고를 조회합니다 (페이징 처리)")
     @GetMapping
-    public ApiResponse<List<JobPostingRes>> getAll() {
-        return ApiResponse.ok(jobPostingService.getAllPostings());
+    public ApiResponse<Page<JobPostingRes>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return ApiResponse.ok(jobPostingService.getAllPostings(pageable));
     }
 
     @Operation(summary = "공고 상세 조회", description = "postingId로 채용공고 상세 정보를 조회합니다")

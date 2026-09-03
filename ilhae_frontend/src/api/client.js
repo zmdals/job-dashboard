@@ -91,8 +91,13 @@ export const api = {
   // =========================
 
   // 전체 공고 조회
-  getPostings() {
-    return request("/postings");
+  getPostings(page = 0, size = 10) {
+    const query = new URLSearchParams({
+      page: String(page),
+      size: String(size),
+    });
+
+    return request(`/postings?${query}`);
   },
 
   // 공고 상세 조회
@@ -122,11 +127,6 @@ export const api = {
     return request(`/postings/${postingId}`, {
       method: "DELETE",
     });
-  },
-
-  // 현재 사용자와 공고의 AI 적합도 분석
-  getPostingRelevance(postingId) {
-    return request(`/postings/${postingId}/relevance`);
   },
 
   // 공고 및 회사 관련 부가 정보
@@ -183,12 +183,18 @@ export const api = {
     });
   },
 
-  // 지원 상태 변경
-  // APPLIED, INTERVIEW 등
-  updateApplicationStatus(applicationId, status) {
-    return request(`/admin/applications/${applicationId}/status`, {
+  // 지원 상태 및 메모 변경
+  updateApplicationStatus(applicationId, status, memo = null) {
+    return request(`/applications/${applicationId}/status`, {
       method: "PATCH",
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, memo }),
+    });
+  },
+
+  // 지원 내역 삭제
+  deleteApplication(applicationId) {
+    return request(`/applications/${applicationId}`, {
+      method: "DELETE",
     });
   },
 

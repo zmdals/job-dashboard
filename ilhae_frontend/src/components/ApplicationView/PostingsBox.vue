@@ -15,53 +15,70 @@ const PAGE_SIZE = 3
 
 const postingsStore = usePostingsStore()
 const meStore = useMeStore()
-const { postings, loading: postingsLoading, error: postingsError } = storeToRefs(postingsStore)
+const {
+  postings,
+  pagination,
+  loading: postingsLoading,
+  error: postingsError,
+} = storeToRefs(postingsStore)
+const { starredPostings } = storeToRefs(meStore)
 
 const activeTab = ref('all')
 const currentPage = ref(1)
 const selectedPosting = ref(null)
 const infoPostingId = ref(null)
-const relevancePostingId = ref(null)
+const relevancePosting = ref(null)
 
 const filteredPostings = computed(() => {
   if (activeTab.value === 'starred') {
-    return postings.value.filter((posting) => meStore.isStarred(posting.id))
+    return starredPostings.value
   }
 
   return postings.value
 })
 
 const visiblePostings = computed(() => {
+  if (activeTab.value === 'all') {
+    return postings.value
+  }
+
   const start = (currentPage.value - 1) * PAGE_SIZE
   return filteredPostings.value.slice(start, start + PAGE_SIZE)
 })
+
+const paginationTotal = computed(() =>
+  activeTab.value === 'all' ? pagination.value.totalElements : starredPostings.value.length,
+)
 
 watch(activeTab, () => {
   currentPage.value = 1
 })
 
-watch(filteredPostings, (items) => {
+watch(starredPostings, (items) => {
+  if (activeTab.value !== 'starred') return
+
   const lastPage = Math.max(1, Math.ceil(items.length / PAGE_SIZE))
   currentPage.value = Math.min(currentPage.value, lastPage)
 })
 
 watch(
-  () => visiblePostings.value.map((posting) => posting.id),
-  async (postingIds) => {
-    await Promise.allSettled(
-      postingIds.map((postingId) =>
-        postingsStore.ensurePostingScore(postingId),
-      ),
-    )
+  [activeTab, currentPage],
+  async ([tab, page]) => {
+    if (tab === 'all') {
+      try {
+        await postingsStore.ensurePostings({
+          page: page - 1,
+          size: PAGE_SIZE,
+        })
+      } catch {
+        return
+      }
+    }
   },
   { immediate: true },
 )
 
-onMounted(() => Promise.allSettled([
-  postingsStore.ensurePostings(),
-  meStore.ensureApplications(),
-  meStore.ensureStarredPostings(),
-]))
+onMounted(() => Promise.allSettled([meStore.ensureApplications(), meStore.ensureStarredPostings()]))
 
 async function apply(postingId) {
   if (!meStore.isApplied(postingId)) {
@@ -99,8 +116,12 @@ async function applySelected() {
       <PostingListHeader />
 
       <div class="posting-list">
-        <p v-if="postingsLoading && !postings.length" class="list-state">채용공고를 불러오는 중입니다.</p>
-        <p v-else-if="postingsError && !postings.length" class="list-state error">채용공고를 불러오지 못했습니다.</p>
+        <p v-if="postingsLoading && !postings.length" class="list-state">
+          채용공고를 불러오는 중입니다.
+        </p>
+        <p v-else-if="postingsError && !postings.length" class="list-state error">
+          채용공고를 불러오지 못했습니다.
+        </p>
         <p v-else-if="!filteredPostings.length" class="list-state">
           {{ activeTab === 'starred' ? '저장한 공고가 없습니다.' : '등록된 채용공고가 없습니다.' }}
         </p>
@@ -109,12 +130,14 @@ async function applySelected() {
             v-for="posting in visiblePostings"
             :key="posting.id"
             :post="posting"
-            :score="postingsStore.getPostingScore(posting.id)"
+            :score="
+              postingsStore.getCompanyRelevance(posting.companyId ?? posting.company?.id).score
+            "
             :starred="meStore.isStarred(posting.id)"
             :applied="meStore.isApplied(posting.id)"
             @emit-request-detail="selectedPosting = posting"
             @emit-request-info="infoPostingId = $event"
-            @emit-request-relevance="relevancePostingId = $event"
+            @emit-request-relevance="relevancePosting = posting"
             @emit-toggle-star="toggleStar"
             @emit-apply="apply"
           />
@@ -123,7 +146,7 @@ async function applySelected() {
 
       <PostingPagination
         v-model="currentPage"
-        :total-items="filteredPostings.length"
+        :total-items="paginationTotal"
         :page-size="PAGE_SIZE"
       />
     </section>
@@ -141,9 +164,11 @@ async function applySelected() {
       @emit-close-card="infoPostingId = null"
     />
     <RelevanceCard
-      v-if="relevancePostingId !== null"
-      :id="relevancePostingId"
-      @emit-close-card="relevancePostingId = null"
+      v-if="relevancePosting"
+      :company-id="relevancePosting.companyId ?? relevancePosting.company?.id"
+      :company-name="relevancePosting.companyName ?? relevancePosting.company?.name"
+      :job-title="relevancePosting.title"
+      @emit-close-card="relevancePosting = null"
     />
   </main>
 </template>

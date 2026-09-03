@@ -174,9 +174,28 @@ export const handlers = [
     return json(publicUser(user), 201)
   }),
 
-  http.get(`${API}/postings`, async () => {
+  http.get(`${API}/postings`, async ({ request }) => {
     await latency()
-    return json(getDb().postings)
+
+    const url = new URL(request.url)
+    const page = Math.max(0, Number(url.searchParams.get('page') ?? 0))
+    const size = Math.max(1, Number(url.searchParams.get('size') ?? 10))
+    const postings = getDb().postings
+    const start = page * size
+    const content = postings.slice(start, start + size)
+    const totalPages = Math.ceil(postings.length / size)
+
+    return json({
+      totalElements: postings.length,
+      totalPages,
+      numberOfElements: content.length,
+      first: page === 0,
+      last: totalPages === 0 || page >= totalPages - 1,
+      size,
+      content,
+      number: page,
+      empty: content.length === 0,
+    })
   }),
 
   http.get(`${API}/postings/:postingId`, async ({ params }) => {
@@ -580,7 +599,7 @@ export const handlers = [
   ),
 
   http.patch(
-    `${API}/admin/applications/:applicationId/status`,
+    `${API}/applications/:applicationId/status`,
     async ({ request, params }) => {
       await latency()
 
@@ -591,15 +610,7 @@ export const handlers = [
         return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
       }
 
-      if (user.role !== 'ADMIN') {
-        return error(
-          403,
-          'FORBIDDEN',
-          '관리자 권한이 필요합니다.',
-        )
-      }
-
-      const { status } = await request.json()
+      const { status, memo } = await request.json()
 
       if (!APPLICATION_STATUSES.includes(status)) {
         return error(
@@ -621,11 +632,50 @@ export const handlers = [
         )
       }
 
+      if (application.userId !== user.id) {
+        return error(403, 'FORBIDDEN', '지원 정보를 수정할 수 없습니다.')
+      }
+
       application.status = status
+      application.memo = memo ?? null
       application.updatedAt = new Date().toISOString()
       saveDb(db)
 
       return json(applicationView(db, application))
+    },
+  ),
+
+  http.delete(
+    `${API}/applications/:applicationId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const index = db.applications.findIndex(
+        (application) => application.id === params.applicationId,
+      )
+
+      if (index < 0) {
+        return error(
+          404,
+          'APPLICATION_NOT_FOUND',
+          '지원 정보를 찾을 수 없습니다.',
+        )
+      }
+
+      if (db.applications[index].userId !== user.id) {
+        return error(403, 'FORBIDDEN', '지원 정보를 삭제할 수 없습니다.')
+      }
+
+      db.applications.splice(index, 1)
+      saveDb(db)
+      return json(null)
     },
   ),
 ]

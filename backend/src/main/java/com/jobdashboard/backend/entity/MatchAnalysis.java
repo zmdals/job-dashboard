@@ -9,6 +9,8 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 
+import static com.jobdashboard.backend.entity.enums.AiStatus.PENDING;
+
 /**
  * 매칭 분석 엔티티
  * FK → Application · AI 확장 지점
@@ -42,8 +44,9 @@ public class MatchAnalysis extends BaseCreatedEntity {
     private String summary;
 
     // AI 응답 상태 - 매칭 분석 요청
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "ai_status")
-    private AiStatus aiStatus;
+    private AiStatus aiStatus = PENDING;
 
 }

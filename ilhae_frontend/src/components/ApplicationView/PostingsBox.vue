@@ -65,10 +65,18 @@ const handleRelevance = (postId) => {
       </div>
     </div>
   </OurBox>
+  <!-- 배경색 어둡게 처리하는 카드 -->
+   <Teleport to="body"><div v-if="showRelevance || showRequirements" class="backdrop"></div></Teleport>
 </template>
 
 <style scoped>
 .postHeader p {
   padding: 20px;
+}
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(105, 105, 105, 0.4);
+  z-index: 10;
 }
 </style>

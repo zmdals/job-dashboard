@@ -4,14 +4,14 @@ import OurBox from "../OurBox.vue";
 import { api } from "@/api/client.js";
 
 const props = defineProps({
-    id:{type:String, required:true}
-})
+  id: { type: String, required: true },
+});
 
-const requirements = ref("")
+const requirements = ref("");
 
 onMounted(async () => {
-    requirements.value = await api.getPostingInfo(props.id);
-})
+  requirements.value = await api.getPostingInfo(props.id);
+});
 
 const emits = defineEmits(["emitCloseCard"]);
 
@@ -21,22 +21,25 @@ const emitCloseCard = () => {
 </script>
 
 <template>
-  <OurBox bg-color="#0101010" class="reqCardContainer">
-    <div>
-      <button @click.stop="emitCloseCard">X</button>
+  <teleport to="body">
+    <OurBox bg-color="#ffffff" class="reqCardContainer">
       <div>
-        <p>{{requirements}}</p>
+        <button @click.stop="emitCloseCard">X</button>
+        <div>
+          <p>{{ requirements }}</p>
+        </div>
       </div>
-    </div>
-  </OurBox>
+    </OurBox>
+  </teleport>
 </template>
 
 <style scoped>
 .reqCardContainer {
-  position: absolute;
+  position: fixed;
   z-index: 1000;
-  right: 10%;
-  height: 1000px;
-  width: 1000px;
+  inset: 0;
+  margin: auto;
+  height: 500px;
+  width: 500px;
 }
 </style>

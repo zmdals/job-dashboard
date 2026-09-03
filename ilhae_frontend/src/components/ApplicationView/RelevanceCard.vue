@@ -21,7 +21,7 @@ const emitCloseCard = () => {
 </script>
 
 <template>
-  <OurBox bg-color="#0101010" class="reqCardContainer">
+  <OurBox bg-color="#ffffff" class="reqCardContainer">
     <div>
       <button @click.stop="emitCloseCard">X</button>
       <div>
@@ -33,10 +33,11 @@ const emitCloseCard = () => {
 
 <style scoped>
 .reqCardContainer {
-  position: absolute;
+  position: fixed;
   z-index: 1000;
-  right: 10%;
-  height: 1000px;
-  width: 1000px;
+  inset: 0;
+  margin: auto;
+  height: 500px;
+  width: 500px;
 }
 </style>

@@ -40,6 +40,7 @@ public class CertificateService {
     }
 
     // 자격증 생성
+    // 사용자 정보를 연결한 뒤 요청 DTO를 Certificate 엔티티로 변환하고 저장한다.
     @Transactional
     public CertificateRes create(CertificateReq req, Long userId) {
         User user = userRepository.findById(userId)

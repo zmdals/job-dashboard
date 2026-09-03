@@ -39,7 +39,8 @@ public class EducationService {
         return EducationRes.from(education);
     }
 
-    // 학력사항 생성
+    // 학력 생성
+    // 요청 DTO를 Education 엔티티로 변환한 뒤 Repository를 통해 저장한다.
     @Transactional
     public EducationRes create(EducationReq req, Long userId) {
         User user = userRepository.findById(userId)

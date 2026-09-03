@@ -40,6 +40,7 @@ public class ProjectService {
     }
 
     // 프로젝트 생성
+    // 사용자 정보를 연결한 뒤 요청 DTO를 Project 엔티티로 변환하고 저장한다.
     @Transactional
     public ProjectRes create(ProjectReq req, Long userId) {
         User user = userRepository.findById(userId)

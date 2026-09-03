@@ -39,7 +39,8 @@ public class CareerService {
         return CareerRes.from(career);
     }
 
-    // 경력사항 생성
+    // 경력 생성
+    // 요청 DTO를 Career 엔티티로 변환한 뒤 Repository를 통해 저장한다.
     @Transactional
     public CareerRes create(CareerReq req, Long userId) {
         User user = userRepository.findById(userId)

@@ -327,6 +327,4 @@ location.reload()
 
 ## 9. Mock 데이터 써먹는 법
 
-npm i -D msw
-npm i swagger-ui-dist
 npx msw init public --save

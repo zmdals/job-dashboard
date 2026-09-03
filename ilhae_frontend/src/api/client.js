@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+const API_LOG_ENABLED = import.meta.env.DEV;
 
 export class ApiError extends Error {
   constructor(message, { status, code } = {}) {
@@ -19,6 +20,8 @@ function getAccessToken() {
 async function request(path, options = {}) {
   const headers = new Headers(options.headers || {});
   const token = getAccessToken();
+  const method = options.method || "GET";
+  const url = `${API_BASE_URL}${path}`;
 
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -28,10 +31,28 @@ async function request(path, options = {}) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
+  if (API_LOG_ENABLED) {
+    console.info(`[API 요청] ${method} ${url}`);
+  }
+
+  let response;
+
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    });
+  } catch (error) {
+    if (API_LOG_ENABLED) {
+      console.error(`[API 연결 실패] ${method} ${url}`, error);
+    }
+    throw error;
+  }
+
+  if (API_LOG_ENABLED) {
+    const log = response.ok ? console.info : console.error;
+    log(`[API 응답] ${response.status} ${method} ${url}`);
+  }
 
   if (response.status === 204) {
     return null;
@@ -356,17 +377,17 @@ export const api = {
   // Cover Letters
   // =========================
 
-  // 자소서 작성
+  // 자소서 생성 (지원 내역당 1개)
   createCoverLetter(applicationId, payload) {
-    return request(`/applications/${applicationId}/cover-letters`, {
+    return request(`/applications/${applicationId}/cover-letter`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
-  // 자소서 목록 조회
-  getCoverLetters(applicationId) {
-    return request(`/applications/${applicationId}/cover-letters`);
+  // 자소서 단건 조회
+  getCoverLetter(applicationId) {
+    return request(`/applications/${applicationId}/cover-letter`);
   },
 
   // =========================

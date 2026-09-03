@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import OurBox from "../OurBox.vue";
 import PostCard from "./PostingCard.vue";
 import { api } from "@/api/client.js";
+import RequirementsCard from "./RequirementsCard.vue";
 
 const allPosts = ref([]);
 const starredPosts = ref([]);
@@ -17,11 +18,23 @@ onMounted(async () => {
   allPosts.value = posts;
   starredPosts.value = starred;
 });
+
+const showRequirements = ref(false)
+const targetRequirements = ref("")
+const handleRequestInfo = (postId) => {
+  showRequirements.value = true
+  targetRequirements.value = postId
+}
+const handeCloseInfo = () => {
+  showRequirements.value = false
+  targetRequirements.value = ""
+}
 </script>
 
 <template>
   <OurBox>
     <div class="postContainer">
+      <RequirementsCard v-if="showRequirements" @emitCloseCard="handeCloseInfo" :id="targetRequirements" />
       <div class="postHeader" style="display: flex; flex-direction: row; margin: auto;">
         <p>공고이름</p>
         <p>직무적합도</p>
@@ -35,6 +48,7 @@ onMounted(async () => {
         :key="post.id"
         :post="post"
         :starred="starredIds.has(post.id)"
+        @emitRequestInfo="handleRequestInfo"
       />
       <div class="postFooter" style="display: flex; flex-direction: row; margin: auto">
         내 정보 기준으로 계산된 에상 합격률입니다.
@@ -43,4 +57,8 @@ onMounted(async () => {
   </OurBox>
 </template>
 
-<style scoped></style>
+<style scoped>
+.postHeader p {
+  padding: 20px;
+}
+</style>

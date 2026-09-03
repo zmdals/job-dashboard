@@ -10,6 +10,13 @@ const props = defineProps({
     default: false,
   },
 });
+
+const emits = defineEmits(["emitRequestInfo"])
+
+const emitRequestInfo= () => {
+  emits('emitRequestInfo', props.post.id)
+}
+
 </script>
 
 <template>
@@ -19,5 +26,8 @@ const props = defineProps({
     <p>
       {{ props.starred ? "★" : "☆" }}
     </p>
+
+    <div @click.stop="emitRequestInfo">{{ post.id }}</div>
+
   </div>
 </template>

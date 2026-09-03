@@ -46,4 +46,14 @@ public class Award extends BaseCreatedEntity {
     // 수상 내용
     private String description;
 
+    public void update(
+            String awardName,
+            String organizer,
+            LocalDate awardDate,
+            String description) {
+        this.awardName = awardName;
+        this.organizer = organizer;
+        this.awardDate = awardDate;
+        this.description = description;
+    }
 }

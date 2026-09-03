@@ -19,6 +19,7 @@ public class CoverLetterService {
     private final CoverLetterRepository coverLetterRepository;
     private final ApplicationRepository applicationRepository;
 
+    //자소서 조회
     public CoverLetterRes get(Long applicationId, Long userId) {
         validateApplicationOwner(applicationId, userId);
 
@@ -28,6 +29,7 @@ public class CoverLetterService {
         return CoverLetterRes.from(coverLetter);
     }
 
+    //자소서 생성
     @Transactional
     public CoverLetterRes create(
             Long applicationId,
@@ -42,6 +44,31 @@ public class CoverLetterService {
 
         CoverLetter coverLetter = req.toEntity(application);
         return CoverLetterRes.from(coverLetterRepository.save(coverLetter));
+    }
+
+    // 자소서 수정
+    @Transactional
+    public CoverLetterRes update(Long applicationId, Long coverLetterId, Long userId, CoverLetterReq req) {
+        applicationRepository.findByIdAndUserId(applicationId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("지원 내역을 찾을 수 없습니다."));
+
+        CoverLetter coverLetter = coverLetterRepository.findByIdAndApplicationId(coverLetterId, applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("자소서를 찾을 수 없습니다."));
+
+        coverLetter.update(req.getTitle(), req.getContent());
+        return CoverLetterRes.from(coverLetter);
+    }
+
+    // 자소서 삭제
+    @Transactional
+    public void remove(Long applicationId, Long coverLetterId, Long userId) {
+        applicationRepository.findByIdAndUserId(applicationId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("지원 내역을 찾을 수 없습니다."));
+
+        CoverLetter coverLetter = coverLetterRepository.findByIdAndApplicationId(coverLetterId, applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("자소서를 찾을 수 없습니다."));
+
+        coverLetterRepository.delete(coverLetter);
     }
 
     private void validateApplicationOwner(Long applicationId, Long userId) {

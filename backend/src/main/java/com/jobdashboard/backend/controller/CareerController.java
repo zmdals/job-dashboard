@@ -2,6 +2,8 @@ package com.jobdashboard.backend.controller;
 
 import java.util.List;
 
+import com.jobdashboard.backend.security.CustomUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,29 +34,33 @@ public class CareerController {
 
     @Operation(summary = "전체 경력 조회", description = "현재 사용자의 모든 경력사항을 조회합니다")
     @GetMapping
-    public ApiResponse<List<CareerRes>> getAll() {
-        Long userId = 1L;
+    public ApiResponse<List<CareerRes>> getAll(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(careerService.getAll(userId));
     }
 
     @Operation(summary = "경력 등록", description = "새 경력사항을 등록합니다")
     @PostMapping
-    public ApiResponse<CareerRes> create(@Valid @RequestBody CareerReq req) {
-        Long userId = 1L;
+    public ApiResponse<CareerRes> create(@Valid @RequestBody CareerReq req,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(careerService.create(req, userId));
     }
 
     @Operation(summary = "경력 수정", description = "경력사항을 수정합니다")
     @PutMapping("/{careerId}")
-    public ApiResponse<CareerRes> update(@PathVariable Long careerId, @Valid @RequestBody CareerReq req) {
-        Long userId = 1L;
+    public ApiResponse<CareerRes> update(@PathVariable Long careerId,
+                                         @Valid @RequestBody CareerReq req,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         return ApiResponse.ok(careerService.update(req, careerId, userId));
     }
 
     @Operation(summary = "경력 삭제", description = "경력사항을 삭제합니다")
     @DeleteMapping("/{careerId}")
-    public ApiResponse<Void> remove(@PathVariable Long careerId) {
-        Long userId = 1L;
+    public ApiResponse<Void> remove(@PathVariable Long careerId,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         careerService.remove(careerId, userId);
         return ApiResponse.ok(null, "삭제 완료");
     }

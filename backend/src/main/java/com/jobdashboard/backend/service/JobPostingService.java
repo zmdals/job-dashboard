@@ -8,10 +8,10 @@ import com.jobdashboard.backend.exception.ResourceNotFoundException;
 import com.jobdashboard.backend.repository.CompanyRepository;
 import com.jobdashboard.backend.repository.JobPostingRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,10 +22,9 @@ public class JobPostingService {
     private final CompanyRepository companyRepository;
 
     // 전체 조회 → findAll → stream으로 Response 변환
-    public List<JobPostingRes> getAllPostings() {
-        return jobPostingRepository.findAll().stream()
-                .map(JobPostingRes::from)
-                .toList();
+    public Page<JobPostingRes> getAllPostings(Pageable pageable) {
+        return jobPostingRepository.findAll(pageable)
+                .map(JobPostingRes::from);
     }
 
     // 단일 상세 조회 → findById → 없으면 ResourceNotFoundException

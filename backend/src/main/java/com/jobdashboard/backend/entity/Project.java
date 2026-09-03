@@ -43,4 +43,13 @@ public class Project extends BaseCreatedEntity {
     @Column(name = "description")
     private String description;
 
+    // 프로젝트 수정
+    public void update(String projectName, String role, String techStack, String description) {
+        this.projectName = projectName;
+        this.role = role;
+        this.techStack = techStack;
+        this.description = description;
+
+    }
+
 }

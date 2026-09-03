@@ -70,36 +70,6 @@ function currentUser(request, db) {
   return db.users.find((user) => user.id === payload.sub) ?? null
 }
 
-function relevanceFor(user, posting) {
-  const userSkills = new Set(user.skills.map((skill) => skill.toLowerCase()))
-  const postingSkills = posting.techStack ?? []
-
-  const matchedSkills = postingSkills.filter((skill) =>
-    userSkills.has(skill.toLowerCase()),
-  )
-
-  const missingSkills = postingSkills.filter(
-    (skill) => !userSkills.has(skill.toLowerCase()),
-  )
-
-  const score = postingSkills.length
-    ? Math.round((matchedSkills.length / postingSkills.length) * 100)
-    : 0
-
-  return {
-    postingId: posting.id,
-    score,
-    matchedSkills,
-    missingSkills,
-    summary:
-      score >= 70
-        ? '보유 기술과 공고의 핵심 기술이 상당 부분 일치합니다.'
-        : score >= 40
-          ? '일부 기술이 일치하며 추가 역량 확인이 필요합니다.'
-          : '현재 등록된 기술 기준으로는 일치도가 낮습니다.',
-  }
-}
-
 export const handlers = [
   http.post(`${API}/auth/login`, async ({ request }) => {
     await latency()
@@ -317,32 +287,6 @@ export const handlers = [
     saveDb(db)
     return json(null)
   }),
-
-  http.get(
-    `${API}/postings/:postingId/relevance`,
-    async ({ request, params }) => {
-      await latency()
-
-      const db = getDb()
-      const user = currentUser(request, db)
-
-      if (!user) {
-        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
-      }
-
-      const posting = findPosting(db, params.postingId)
-
-      if (!posting) {
-        return error(
-          404,
-          'POSTING_NOT_FOUND',
-          '공고를 찾을 수 없습니다.',
-        )
-      }
-
-      return json(relevanceFor(user, posting))
-    },
-  ),
 
   http.get(`${API}/postings/:postingId/info`, async ({ params }) => {
     await latency()

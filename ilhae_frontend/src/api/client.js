@@ -46,17 +46,22 @@ async function request(path, options = {}) {
     });
   }
 
-  // Spring controllers return ApiResponse<T>, while the local mocks still
-  // return T directly. Supporting both keeps stores independent of transport.
-  if (
+  // 서버의 status 기반 응답과 기존 success 기반 응답, 로컬 mock 원본 응답을 모두 지원한다.
+  const isApiResponse =
     body &&
     typeof body === "object" &&
-    typeof body.success === "boolean" &&
-    Object.hasOwn(body, "data")
-  ) {
-    if (!body.success) {
+    Object.hasOwn(body, "data") &&
+    (typeof body.success === "boolean" || typeof body.status === "number");
+
+  if (isApiResponse) {
+    const failed =
+      body.success === false ||
+      (typeof body.status === "number" &&
+        (body.status < 200 || body.status >= 300));
+
+    if (failed) {
       throw new ApiError(body.message || "요청에 실패했습니다.", {
-        status: response.status,
+        status: body.status || response.status,
         code: body.code || "API_ERROR",
       });
     }
@@ -104,11 +109,6 @@ export const api = {
   // JobRequirement(지원자격)도 상세 응답에 포함한다고 가정
   getPosting(postingId) {
     return request(`/postings/${postingId}`);
-  },
-
-  // 현재 사용자와 공고의 AI 적합도 분석
-  getPostingRelevance(postingId) {
-    return request(`/postings/${postingId}/relevance`);
   },
 
   // 공고 등록 (companyId, title 필수)

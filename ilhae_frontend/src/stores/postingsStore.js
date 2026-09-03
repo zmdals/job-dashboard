@@ -5,9 +5,6 @@ import { api } from '@/api/client'
 export const usePostingsStore = defineStore('postings', () => {
   const postings = ref([])
   const selectedPosting = ref(null)
-  const relevance = ref(null)
-  const relevanceByPostingId = ref({})
-  const scoreByPostingId = ref({})
   const info = ref(null)
   const pagination = ref({
     totalElements: 0,
@@ -25,42 +22,11 @@ export const usePostingsStore = defineStore('postings', () => {
   const hasLoadedPostings = ref(false)
   let pendingRequests = 0
   const postingsRequests = new Map()
-  const relevanceRequests = new Map()
 
   const postingCount = computed(() => pagination.value.totalElements)
 
   function getPostingById(postingId) {
     return postings.value.find((posting) => String(posting.id) === String(postingId)) ?? null
-  }
-
-  function extractScore(value) {
-    if (typeof value === 'number') return value
-
-    return (
-      value?.score ??
-      value?.relevanceScore ??
-      value?.aiFitScore ??
-      value?.matchScore ??
-      value?.passProbability ??
-      value?.relevance?.score ??
-      null
-    )
-  }
-
-  function cachePostingScore(postingId, value) {
-    const score = extractScore(value)
-
-    if (score !== null && score !== undefined) {
-      scoreByPostingId.value[String(postingId)] = score
-    }
-  }
-
-  function getPostingScore(postingId) {
-    return scoreByPostingId.value[String(postingId)] ?? null
-  }
-
-  function getRelevance(postingId) {
-    return relevanceByPostingId.value[String(postingId)] ?? null
   }
 
   function updatePostingPageCaches(posting) {
@@ -141,7 +107,6 @@ export const usePostingsStore = defineStore('postings', () => {
 
       postingPages.value[key] = pageData
       usePostingPage(pageData)
-      pageData.content.forEach((posting) => cachePostingScore(posting.id, posting))
       hasLoadedPostings.value = true
       return postings.value
     })
@@ -170,7 +135,6 @@ export const usePostingsStore = defineStore('postings', () => {
   async function fetchPosting(postingId) {
     return run(async () => {
       selectedPosting.value = await api.getPosting(postingId)
-      cachePostingScore(postingId, selectedPosting.value)
 
       const index = postings.value.findIndex((posting) => String(posting.id) === String(postingId))
 
@@ -188,7 +152,6 @@ export const usePostingsStore = defineStore('postings', () => {
     return run(async () => {
       const posting = await api.createPosting(payload)
       postings.value.push(posting)
-      cachePostingScore(posting.id, posting)
       selectedPosting.value = posting
       invalidatePostingPages()
       return posting
@@ -198,7 +161,6 @@ export const usePostingsStore = defineStore('postings', () => {
   async function updatePosting(postingId, payload) {
     return run(async () => {
       const posting = await api.updatePosting(postingId, payload)
-      cachePostingScore(postingId, posting)
       const index = postings.value.findIndex((item) => String(item.id) === String(postingId))
 
       if (index >= 0) {
@@ -226,54 +188,8 @@ export const usePostingsStore = defineStore('postings', () => {
         selectedPosting.value = null
       }
 
-      delete scoreByPostingId.value[String(postingId)]
-      delete relevanceByPostingId.value[String(postingId)]
-
       invalidatePostingPages()
     })
-  }
-
-  async function fetchRelevance(postingId) {
-    return run(async () => {
-      const result = await api.getPostingRelevance(postingId)
-      const key = String(postingId)
-
-      relevanceByPostingId.value[key] = result
-      cachePostingScore(postingId, result)
-      relevance.value = result
-
-      return result
-    })
-  }
-
-  function ensureRelevance(postingId) {
-    const key = String(postingId)
-    const cached = relevanceByPostingId.value[key]
-
-    if (cached) {
-      relevance.value = cached
-      return Promise.resolve(cached)
-    }
-
-    if (!relevanceRequests.has(key)) {
-      const request = fetchRelevance(postingId).finally(() => {
-        relevanceRequests.delete(key)
-      })
-
-      relevanceRequests.set(key, request)
-    }
-
-    return relevanceRequests.get(key)
-  }
-
-  function ensurePostingScore(postingId) {
-    const cachedScore = getPostingScore(postingId)
-
-    if (cachedScore !== null) {
-      return Promise.resolve(cachedScore)
-    }
-
-    return ensureRelevance(postingId).then((result) => extractScore(result))
   }
 
   async function fetchInfo(postingId) {
@@ -288,9 +204,6 @@ export const usePostingsStore = defineStore('postings', () => {
   return {
     postings,
     selectedPosting,
-    relevance,
-    relevanceByPostingId,
-    scoreByPostingId,
     info,
     pagination,
     postingPages,
@@ -299,17 +212,12 @@ export const usePostingsStore = defineStore('postings', () => {
     hasLoadedPostings,
     postingCount,
     getPostingById,
-    getPostingScore,
-    getRelevance,
     fetchPostings,
     ensurePostings,
     fetchPosting,
     createPosting,
     updatePosting,
     deletePosting,
-    fetchRelevance,
-    ensureRelevance,
-    ensurePostingScore,
     fetchInfo,
   }
 })

@@ -41,7 +41,13 @@ async function logout() {
 
     <nav class="home-nav" aria-label="주요 메뉴">
       <button type="button" :class="{ active: $route.name === 'home' }" @click="gotoHome">HOME</button>
-      <button type="button" :class="{ active: $route.name === 'postings' }" @click="gotoPosts">채용공고</button>
+      <button
+        type="button"
+        :class="{ active: ['postings', 'posting-report'].includes($route.name) }"
+        @click="gotoPosts"
+      >
+        채용공고
+      </button>
       <button type="button" :class="{ active: $route.name === 'profile' }" @click="gotoProfile">내프로필</button>
     </nav>
 

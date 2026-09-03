@@ -1,10 +1,7 @@
 <script setup>
-import DetailComp from '@/components/ApplicationView/DetailComp.vue';
+import DetailComp from '@/components/ApplicationView/DetailComp.vue'
 </script>
 
 <template>
-    <DetailComp />
+  <DetailComp />
 </template>
-
-<style scoped>
-</style>

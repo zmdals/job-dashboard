@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 import ModalBox from '@/components/LegoBox/ModalBox.vue'
 import { usePostingsStore } from '@/stores/postingsStore'
 
@@ -11,6 +12,7 @@ const props = defineProps({
 defineEmits(['emitCloseCard'])
 
 const postingsStore = usePostingsStore()
+const router = useRouter()
 const { info, loading } = storeToRefs(postingsStore)
 const loadError = ref(false)
 
@@ -24,6 +26,15 @@ onMounted(async () => {
     loadError.value = true
   }
 })
+
+const handleDetailRequest = () => {
+  if (company.value?.id == null) return
+
+  router.push({
+    name: 'posting-report',
+    params: { companyId: company.value.id },
+  })
+}
 </script>
 
 <template>
@@ -46,7 +57,9 @@ onMounted(async () => {
     </template>
 
     <template #actions>
-      <button type="button" @click="$emit('emitCloseCard')">닫기</button>
+      <button type="button" :disabled="company?.id == null" @click="handleDetailRequest">
+        맞춤 기업 리포트
+      </button>
       <a v-if="company?.homepageUrl" class="primary" :href="company.homepageUrl" target="_blank" rel="noreferrer">회사 홈페이지</a>
     </template>
   </ModalBox>

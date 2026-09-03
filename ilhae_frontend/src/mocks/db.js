@@ -7,10 +7,44 @@ function clone(value) {
 }
 
 function migrate(db) {
+  const storedVersion = db.mockDataVersion ?? 1
   const initialScoreByPostingId = new Map(
     initialMockDb.postings.map((posting) => [posting.id, posting.relevanceScore]),
   )
   let changed = false
+
+  if (storedVersion < 2) {
+    const mergeMissingById = (storedItems = [], initialItems = []) => {
+      const storedIds = new Set(storedItems.map((item) => item.id))
+      return [
+        ...storedItems,
+        ...initialItems.filter((item) => !storedIds.has(item.id)).map(clone),
+      ]
+    }
+
+    db.companies = mergeMissingById(db.companies, initialMockDb.companies)
+    db.postings = mergeMissingById(db.postings, initialMockDb.postings)
+    db.applications = mergeMissingById(db.applications, initialMockDb.applications)
+    db.postingInfoById = {
+      ...clone(initialMockDb.postingInfoById),
+      ...db.postingInfoById,
+    }
+    changed = true
+  }
+
+  if (storedVersion < 3) {
+    db.applications?.forEach((application) => {
+      if (application.status === 'IN_PROGRESS') {
+        application.status = 'FIRST_INTERVIEW'
+      }
+    })
+    changed = true
+  }
+
+  if (storedVersion < initialMockDb.mockDataVersion) {
+    db.mockDataVersion = initialMockDb.mockDataVersion
+    changed = true
+  }
 
   db.postings?.forEach((posting) => {
     if (posting.relevanceScore != null) return

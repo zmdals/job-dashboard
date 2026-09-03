@@ -10,6 +10,10 @@ defineProps({
     type: String,
     default: '',
   },
+  wide: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['close'])
@@ -24,7 +28,14 @@ function closeOnBackdrop(event) {
 <template>
   <Teleport to="body">
     <div class="modal-backdrop" role="presentation" @click="closeOnBackdrop">
-      <OurBox class="modal-box" padding-class="" role="dialog" aria-modal="true" :aria-label="title">
+      <OurBox
+        class="modal-box"
+        :class="{ wide }"
+        padding-class=""
+        role="dialog"
+        aria-modal="true"
+        :aria-label="title"
+      >
         <header class="modal-head">
           <div>
             <h3>{{ title }}</h3>
@@ -59,6 +70,10 @@ function closeOnBackdrop(event) {
   overflow: auto;
   border-radius: 10px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-box.wide {
+  width: min(100%, 960px);
 }
 
 .modal-head {

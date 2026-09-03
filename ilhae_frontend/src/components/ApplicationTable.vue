@@ -1,33 +1,104 @@
 <script setup>
-defineProps({
+import { ref } from 'vue'
+import {
+  APPLICATION_STATUS_GROUPS,
+  APPLICATION_STATUS_OPTIONS,
+  APPLICATION_STATUS_TRANSITIONS,
+} from '@/constants/applicationStatus'
+import ApplicationPreparationModal from '@/components/LegoBox/ApplicationPreparationModal.vue'
+
+const props = defineProps({
   applications: {
     type: Array,
     required: true,
   },
 })
 
-const statusOptions = ['서류준비', '지원완료', '코딩테스트 (필기시험)', '1차면접', '2차면접', '최종면접', '탈락', '최종합격']
+const emit = defineEmits(['updateStatus', 'delete'])
+
+const selectedApplication = ref(null)
+const preparationMode = ref('cover-letter')
+
+function statusOptionsFor(currentStatus) {
+  const availableStatuses = new Set([
+    currentStatus,
+    ...(APPLICATION_STATUS_TRANSITIONS[currentStatus] ?? []),
+  ])
+
+  return APPLICATION_STATUS_OPTIONS.filter(({ value }) => availableStatuses.has(value))
+}
+
+function isTerminalStatus(status) {
+  return (APPLICATION_STATUS_TRANSITIONS[status] ?? []).length === 0
+}
+
+function updateStatus(application, event) {
+  emit('updateStatus', application, event.target.value)
+}
+
+function canViewInterviewQuestions(status) {
+  return APPLICATION_STATUS_GROUPS['면접 예정'].includes(status)
+}
+
+function openPreparation(application, mode) {
+  selectedApplication.value = application
+  preparationMode.value = mode
+}
+
+function closePreparation() {
+  selectedApplication.value = null
+}
 </script>
 
 <template>
-    <div class="app-head">
-        <h3>내 지원 목록</h3>
-        <span>총 {{ applications.length }}개</span>
+  <div class="app-head">
+    <h3>내 지원 목록</h3>
+    <span>총 {{ props.applications.length }}개</span>
+  </div>
+  <div class="app-table">
+    <p v-if="!props.applications.length" class="empty-state">표시할 지원 내역이 없습니다.</p>
+    <div v-for="app in props.applications" v-else :key="app.id" class="table-row">
+      <div class="company-name">
+        <span class="company-logo">{{ app.companyName?.slice(0, 1) || '?' }}</span>
+        {{ app.companyName || '회사명 미정' }}
+      </div>
+      <div class="company-meta">{{ app.jobTitle || '채용공고' }}</div>
+      <div class="preparation-actions">
+        <button type="button" @click="openPreparation(app, 'cover-letter')">자기소개서</button>
+        <button
+          type="button"
+          :disabled="!canViewInterviewQuestions(app.status)"
+          :title="canViewInterviewQuestions(app.status) ? '' : '면접 예정 단계에서 확인할 수 있습니다.'"
+          @click="openPreparation(app, 'interview')"
+        >
+          예상 면접 질문
+        </button>
+      </div>
+      <select
+        class="status-select"
+        :value="app.status"
+        :aria-label="`${app.companyName || '회사'} 지원 상태`"
+        :disabled="isTerminalStatus(app.status)"
+        @change="updateStatus(app, $event)"
+      >
+        <option
+          v-for="option in statusOptionsFor(app.status)"
+          :key="option.value"
+          :value="option.value"
+        >
+          {{ option.label }}
+        </option>
+      </select>
+      <button class="delete-btn" type="button" @click="emit('delete', app.id)">삭제</button>
     </div>
-    <div class="app-table">
-        <div class="table-row" v-for="app in applications" :key="app.id">
-            <div class="company-name">
-                <span class="company-logo">{{ app.company?.slice(0, 1) }}</span>
-                {{ app.company }}
-            </div>
-            <div class="company-meta">{{ app.role }}</div>
-            <div class="deadline">지원일 {{ app.announceDate }}</div>
-            <select class="status-select" v-model="app.status">
-                <option v-for="opt in statusOptions" :key="opt" :value="opt">{{ opt }}</option>
-            </select>
-            <button class="delete-btn" type="button">삭제</button>
-        </div>
-    </div>
+  </div>
+
+  <ApplicationPreparationModal
+    v-if="selectedApplication"
+    :application="selectedApplication"
+    :mode="preparationMode"
+    @close="closePreparation"
+  />
 </template>
 
 <style scoped>
@@ -60,9 +131,18 @@ const statusOptions = ['서류준비', '지원완료', '코딩테스트 (필기�
     background: #fff;
 }
 
+.empty-state {
+  margin: 0;
+  padding: 42px 22px;
+  border-bottom: 1px solid #e7e7e7;
+  color: #999;
+  font-size: 12px;
+  text-align: center;
+}
+
 .table-row {
     display: grid;
-    grid-template-columns: 1.45fr 1fr 1fr minmax(110px, 1fr) 42px;
+    grid-template-columns: 1.3fr .9fr 1.5fr minmax(110px, 1fr) 42px;
     align-items: center;
     gap: 20px;
     min-height: 78px;
@@ -90,10 +170,38 @@ const statusOptions = ['서류준비', '지원완료', '코딩테스트 (필기�
     font-size: 11px;
 }
 
-.company-meta,
-.deadline {
+.company-meta {
     color: #999;
     font-size: 11px;
+}
+
+.preparation-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.preparation-actions button {
+  min-height: 32px;
+  padding: 6px 7px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #666;
+  background: #fff;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.preparation-actions button:hover:not(:disabled),
+.preparation-actions button:focus-visible:not(:disabled) {
+  border-color: #e31b23;
+  color: #e31b23;
+}
+
+.preparation-actions button:disabled {
+  color: #bbb;
+  background: #f5f5f5;
+  cursor: not-allowed;
 }
 
 .status-select {
@@ -109,6 +217,12 @@ const statusOptions = ['서류준비', '지원완료', '코딩테스트 (필기�
 .status-select:focus {
     border-color: #e31b23;
     outline: 0;
+}
+
+.status-select:disabled {
+  color: #999;
+  background: #f5f5f5;
+  cursor: default;
 }
 
 .delete-btn {

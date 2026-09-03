@@ -1,11 +1,9 @@
 export const APPLICATION_STATUSES = [
+  'PREPARING',
   'APPLIED',
-  'DOCUMENT_PASSED',
-  'DOCUMENT_FAILED',
-  'INTERVIEW',
-  'FINAL_PASSED',
-  'FINAL_FAILED',
-  'WITHDRAWN',
+  'IN_PROGRESS',
+  'ACCEPTED',
+  'REJECTED',
 ]
 
 export const initialMockDb = {
@@ -41,17 +39,20 @@ export const initialMockDb = {
     },
   ],
 
+  companies: [
+    { id: 'company-001', name: 'Example AI' },
+    { id: 'company-002', name: 'Data Lab' },
+    { id: 'company-003', name: 'Cloud Works' },
+  ],
+
   postings: [
     {
       id: 'posting-001',
       title: 'Frontend Engineer',
-      company: {
-        id: 'company-001',
-        name: 'Example AI',
-        logoUrl: null,
-      },
+      companyId: 'company-001',
+      companyName: 'Example AI',
       location: '서울',
-      employmentType: 'FULL_TIME',
+      jobType: 'FULL_TIME',
       experienceLevel: 'JUNIOR',
       techStack: ['Vue', 'TypeScript', 'JavaScript'],
       summary: 'Vue 기반 웹 서비스를 함께 개발할 프론트엔드 엔지니어를 모집합니다.',
@@ -72,13 +73,10 @@ export const initialMockDb = {
     {
       id: 'posting-002',
       title: 'AI Platform Engineer',
-      company: {
-        id: 'company-002',
-        name: 'Data Lab',
-        logoUrl: null,
-      },
+      companyId: 'company-002',
+      companyName: 'Data Lab',
       location: '판교',
-      employmentType: 'FULL_TIME',
+      jobType: 'FULL_TIME',
       experienceLevel: 'JUNIOR',
       techStack: ['Python', 'FastAPI', 'Docker'],
       summary: 'AI 서비스용 백엔드와 데이터 파이프라인을 개발합니다.',
@@ -98,13 +96,10 @@ export const initialMockDb = {
     {
       id: 'posting-003',
       title: 'Web Frontend Intern',
-      company: {
-        id: 'company-003',
-        name: 'Cloud Works',
-        logoUrl: null,
-      },
+      companyId: 'company-003',
+      companyName: 'Cloud Works',
       location: '서울',
-      employmentType: 'INTERN',
+      jobType: 'INTERN',
       experienceLevel: 'ENTRY',
       techStack: ['Vue', 'JavaScript', 'CSS'],
       summary: '웹 프론트엔드 개발 인턴을 모집합니다.',

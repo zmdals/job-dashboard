@@ -1,24 +1,7 @@
 <script setup>
-import AuthBrandPanel from '@/components/AuthBrandPanel.vue';
-import SignupForm from '@/components/SignupForm.vue';
+import LoginView from '@/views/LoginView.vue'
 </script>
 
 <template>
-  <div class="signup-page">
-    <AuthBrandPanel />
-    <SignupForm />
-  </div>
+  <LoginView />
 </template>
-
-<style scoped>
-.signup-page {
-  display: flex;
-  min-height: 100vh;
-}
-.signup-form {
-  width: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-</style>

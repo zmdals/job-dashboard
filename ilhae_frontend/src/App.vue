@@ -10,4 +10,19 @@ const route = useRoute()
   <RouterView />
 </template>
 
-<style scoped></style>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #202124;
+  font-family: Arial, "Apple SD Gothic Neo", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+</style>

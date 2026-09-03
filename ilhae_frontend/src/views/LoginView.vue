@@ -1,24 +1,25 @@
 <script setup>
-import AuthBrandPanel from '@/components/AuthBrandPanel.vue';
-import LoginForm from '@/components/LoginForm.vue';
+import AuthBrandPanel from '@/components/AuthBrandPanel.vue'
+import LoginForm from '@/components/LoginForm.vue'
 </script>
 
 <template>
-  <div class="login-page">
+  <main class="auth-page">
     <AuthBrandPanel />
     <LoginForm />
-  </div>
+  </main>
 </template>
 
 <style scoped>
-.login-page {
-  display: flex;
+.auth-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   min-height: 100vh;
 }
-.login-form {
-  width: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+@media (max-width: 760px) {
+  .auth-page {
+    display: block;
+  }
 }
 </style>

@@ -54,15 +54,7 @@ const certificates = ref([
     { id: 3, name: 'GMP 교육 수료', detail: '', period: '', description: '' },
 ])
 
-const awards = ref([
-    {
-        id: 1,
-        name: '교내 캡스톤 경진대회 장려상',
-        detail: '',
-        period: '2022.11',
-        description: '미생물 배양 자동화',
-    },
-])
+
 
 function removeItem(list, id) {
     const index = list.findIndex(item => item.id === id)
@@ -120,15 +112,7 @@ function saveModal(formValue) {
                 @remove="id => removeItem(career, id)"
             ></EditableTimeLineGroup>
         </InfoCard>
-        <InfoCard title="수상경력" @add="openAddModal('수상경력', awards)">
-            <EditableTimeLineGroup
-                :items="awards"
-                idKey="id"
-                @edit="item => openEditModal('수상경력', awards, item)"
-                @remove="id => removeItem(awards, id)"
-            ></EditableTimeLineGroup>
-        </InfoCard>
-        <InfoCard title="프로젝트" class="full-width" @add="openAddModal('프로젝트', projects)">
+        <InfoCard title="프로젝트" @add="openAddModal('프로젝트', projects)">
             <EditableTimeLineGroup
                 :items="projects"
                 idKey="id"
@@ -136,7 +120,6 @@ function saveModal(formValue) {
                 @remove="id => removeItem(projects, id)"
             ></EditableTimeLineGroup>
         </InfoCard>
-        <InfoCard title="희망 취업 조건" class="full-width"></InfoCard>
     </div>
 
     <ProfileFormModal

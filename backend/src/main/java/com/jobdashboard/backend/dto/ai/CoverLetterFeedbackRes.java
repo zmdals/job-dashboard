@@ -7,14 +7,15 @@ import lombok.Getter;
 import java.util.List;
 
 /**
- * 적합도 응답 (비저장, 모달용)
+ * 자소서 AI 피드백 응답 (비저장)
  */
 @Getter
 @Builder
 @AllArgsConstructor
-public class RelevanceRes {
+public class CoverLetterFeedbackRes {
+    private Long coverLetterId;
     private Integer score;
     private String summary;
     private List<String> strengths;
-    private List<String> weaknesses;
+    private List<String> improvements;
 }

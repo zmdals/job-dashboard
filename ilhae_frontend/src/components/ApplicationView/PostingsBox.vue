@@ -26,7 +26,7 @@ const { starredPostings } = storeToRefs(meStore)
 const activeTab = ref('all')
 const currentPage = ref(1)
 const selectedPosting = ref(null)
-const infoPostingId = ref(null)
+const infoPosting = ref(null)
 const relevancePosting = ref(null)
 
 const filteredPostings = computed(() => {
@@ -134,7 +134,7 @@ async function applySelected() {
             :starred="meStore.isStarred(posting.id)"
             :applied="meStore.isApplied(posting.id)"
             @emit-request-detail="selectedPosting = posting"
-            @emit-request-info="infoPostingId = $event"
+            @emit-request-info="infoPosting = posting"
             @emit-request-relevance="relevancePosting = posting"
             @emit-toggle-star="toggleStar"
             @emit-apply="apply"
@@ -157,9 +157,9 @@ async function applySelected() {
       @apply="applySelected"
     />
     <RequirementsCard
-      v-if="infoPostingId !== null"
-      :id="infoPostingId"
-      @emit-close-card="infoPostingId = null"
+      v-if="infoPosting"
+      :company-id="infoPosting.companyId ?? infoPosting.company?.id"
+      @emit-close-card="infoPosting = null"
     />
     <RelevanceCard
       v-if="relevancePosting"

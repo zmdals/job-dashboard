@@ -16,10 +16,7 @@ function migrate(db) {
   if (storedVersion < 2) {
     const mergeMissingById = (storedItems = [], initialItems = []) => {
       const storedIds = new Set(storedItems.map((item) => item.id))
-      return [
-        ...storedItems,
-        ...initialItems.filter((item) => !storedIds.has(item.id)).map(clone),
-      ]
+      return [...storedItems, ...initialItems.filter((item) => !storedIds.has(item.id)).map(clone)]
     }
 
     db.companies = mergeMissingById(db.companies, initialMockDb.companies)
@@ -38,6 +35,19 @@ function migrate(db) {
         application.status = 'FIRST_INTERVIEW'
       }
     })
+    changed = true
+  }
+
+  if (storedVersion < 4) {
+    const initialCompanyById = new Map(
+      initialMockDb.companies.map((company) => [company.id, company]),
+    )
+
+    db.companies = (db.companies ?? []).map((company) => ({
+      ...clone(initialCompanyById.get(company.id) ?? {}),
+      ...company,
+    }))
+    db.companyEvidencesById = clone(initialMockDb.companyEvidencesById)
     changed = true
   }
 

@@ -134,9 +134,18 @@ export const api = {
     });
   },
 
-  // 공고 및 회사 관련 부가 정보
-  getPostingInfo(postingId) {
-    return request(`/postings/${postingId}/info`);
+  // =========================
+  // Companies
+  // =========================
+
+  // 회사 상세 정보 조회
+  getCompany(companyId) {
+    return request(`/companies/${companyId}`);
+  },
+
+  // 맞춤 기업 리포트 자료 조회
+  getCompanyEvidences(companyId) {
+    return request(`/companies/${companyId}/evidences`);
   },
 
   // =========================
@@ -267,7 +276,7 @@ export const api = {
   updateApplicationStatus(applicationId, status, memo = null) {
     return request(`/applications/${applicationId}/status`, {
       method: "PATCH",
-      body: JSON.stringify({ applicationStatus: status, memo }),
+      body: JSON.stringify({ status, memo }),
     });
   },
 

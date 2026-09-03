@@ -43,6 +43,24 @@ async function request(path, options = {}) {
     });
   }
 
+  // Spring controllers return ApiResponse<T>, while the local mocks still
+  // return T directly. Supporting both keeps stores independent of transport.
+  if (
+    body &&
+    typeof body === "object" &&
+    typeof body.success === "boolean" &&
+    Object.hasOwn(body, "data")
+  ) {
+    if (!body.success) {
+      throw new ApiError(body.message || "요청에 실패했습니다.", {
+        status: response.status,
+        code: body.code || "API_ERROR",
+      });
+    }
+
+    return body.data;
+  }
+
   return body;
 }
 
@@ -80,11 +98,37 @@ export const api = {
     return request(`/postings/${postingId}`);
   },
 
+  // 공고 등록 (companyId, title 필수)
+  createPosting(payload) {
+    return request("/postings", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // 공고 수정 (companyId, title 필수, 회사 연결은 서버에서 유지)
+  updatePosting(postingId, payload) {
+    return request(`/postings/${postingId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // 공고 삭제
+  deletePosting(postingId) {
+    return request(`/postings/${postingId}`, {
+      method: "DELETE",
+    });
+  },
+
   // 현재 사용자와 공고의 AI 적합도 분석
   getPostingRelevance(postingId) {
-    return request(`/postings/${postingId}/ai/relevance`, {
-      method: "POST",
-    });
+    return request(`/postings/${postingId}/relevance`);
+  },
+
+  // 공고 및 회사 관련 부가 정보
+  getPostingInfo(postingId) {
+    return request(`/postings/${postingId}/info`);
   },
 
   // =========================
@@ -139,7 +183,7 @@ export const api = {
   // 지원 상태 변경
   // APPLIED, INTERVIEW 등
   updateApplicationStatus(applicationId, status) {
-    return request(`/applications/${applicationId}/status`, {
+    return request(`/admin/applications/${applicationId}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     });

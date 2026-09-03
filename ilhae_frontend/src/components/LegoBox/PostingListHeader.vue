@@ -1,7 +1,7 @@
 <template>
   <div class="posting-list-header" aria-hidden="true">
     <span>회사 / 포지션</span>
-    <span>예상 합격률</span>
+    <span>직무 적합도</span>
     <span>마감기한</span>
     <span>회사정보</span>
     <span>선호공고</span>

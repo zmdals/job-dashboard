@@ -152,6 +152,44 @@ export const useMeStore = defineStore('me', () => {
     })
   }
 
+  async function updateApplicationStatus(
+    applicationId,
+    status,
+    memo = null,
+  ) {
+    return run(async () => {
+      const application = normalizeApplication(
+        await api.updateApplicationStatus(
+          applicationId,
+          status,
+          memo,
+        ),
+      )
+      const index = applications.value.findIndex(
+        (item) => String(item.id) === String(applicationId),
+      )
+
+      if (index >= 0) {
+        applications.value[index] = application
+      } else {
+        applications.value.unshift(application)
+      }
+
+      return application
+    })
+  }
+
+  async function deleteApplication(applicationId) {
+    return run(async () => {
+      const result = await api.deleteApplication(applicationId)
+      applications.value = applications.value.filter(
+        (application) =>
+          String(application.id) !== String(applicationId),
+      )
+      return result
+    })
+  }
+
   async function fetchStarredPostings() {
     return run(async () => {
       starredPostings.value =
@@ -247,6 +285,8 @@ export const useMeStore = defineStore('me', () => {
     fetchApplications,
     ensureApplications,
     apply,
+    updateApplicationStatus,
+    deleteApplication,
     fetchStarredPostings,
     ensureStarredPostings,
     toggleStar,

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>취업했음청년 | 로그인</title>
+		<style>
+			:root {
+				--red: #e31b23;
+				--red-soft: #fff0f0;
+				--ink: #202124;
+				--muted: #858585;
+				--line: #e7e7e7;
+				--cream: #fff8f3;
+			}
+
+			* { box-sizing: border-box; }
+			body { margin: 0; color: var(--ink); font-family: Arial, "Apple SD Gothic Neo", sans-serif; }
+			button, input { font: inherit; }
+			button { cursor: pointer; }
+
+			.page { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+			.visual { position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 38px 8%; overflow: hidden; background: var(--cream); }
+			.logo { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; }
+			.logo-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: #fff; background: var(--red); font-weight: 700; }
+			.intro { position: relative; z-index: 1; margin-top: 8vh; }
+			.intro small { color: var(--red); font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+			h1 { margin: 16px 0 18px; font-size: clamp(44px, 5vw, 72px); line-height: 1; letter-spacing: -.09em; }
+			h1 span { color: var(--red); }
+			.intro p { margin: 0; color: #756c68; font-size: 15px; line-height: 1.7; }
+			.scene { position: relative; height: 45vh; min-height: 270px; margin: 0 -5%; }
+			.ground { position: absolute; right: -10%; bottom: -42%; width: 120%; height: 80%; border-radius: 50% 50% 0 0; background: #d9e4d2; transform: rotate(-5deg); }
+			.sun { position: absolute; right: 21%; bottom: 48%; width: 74px; height: 74px; border-radius: 50%; background: #f6bd56; }
+			.person { position: absolute; bottom: 13%; left: 48%; width: 92px; height: 185px; }
+			.head { position: absolute; top: 0; left: 29px; width: 45px; height: 48px; border-radius: 50%; background: #e4a073; }
+			.hair { position: absolute; top: -6px; left: 23px; width: 55px; height: 39px; border-radius: 50% 55% 25% 30%; background: #352c2c; }
+			.body { position: absolute; top: 45px; left: 15px; width: 69px; height: 88px; border-radius: 28px 28px 10px 10px; background: var(--red); }
+			.leg { position: absolute; top: 124px; width: 18px; height: 66px; border-radius: 12px; background: #384653; }
+			.leg.one { left: 29px; transform: rotate(7deg); }.leg.two { left: 56px; transform: rotate(-7deg); }
+			.flag { position: absolute; right: 17%; bottom: 35%; width: 4px; height: 88px; background: #8a7066; transform: rotate(8deg); }
+			.flag::before { position: absolute; top: 0; left: 3px; width: 48px; height: 29px; background: var(--red); content: ""; clip-path: polygon(0 0, 100% 0, 82% 50%, 100% 100%, 0 100%); }
+			.note { position: absolute; top: 24%; right: 1%; padding: 12px 15px; border-radius: 9px; color: #514644; background: #fff; box-shadow: 0 8px 22px rgba(80, 50, 40, .09); font-size: 11px; }
+			.note b { display: block; margin-top: 4px; color: var(--red); font-size: 14px; }
+			.caption { color: #a18f86; font-size: 11px; }
+
+			.form-side { display: grid; place-items: center; padding: 40px 9%; background: #fff; }
+			.form-box { width: min(100%, 390px); }
+			.form-box header { margin-bottom: 30px; }.form-box header small { color: var(--red); font-size: 11px; font-weight: 700; letter-spacing: .1em; }.form-box h2 { margin: 13px 0 8px; font-size: 28px; letter-spacing: -.07em; }.form-box header p { margin: 0; color: var(--muted); font-size: 13px; }
+			.tabs { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 27px; border-bottom: 1px solid var(--line); }.tabs button { padding: 0 0 13px; border: 0; border-bottom: 2px solid transparent; color: #aaa; background: transparent; font-size: 14px; font-weight: 700; }.tabs .selected { border-bottom-color: var(--red); color: var(--ink); }
+			label { display: block; margin: 0 0 8px; font-size: 12px; font-weight: 700; }.field { width: 100%; height: 50px; margin-bottom: 19px; padding: 0 14px; border: 1px solid var(--line); border-radius: 7px; outline: 0; font-size: 13px; }.field:focus { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-soft); }.field::placeholder { color: #b7b7b7; }
+			.options { display: flex; justify-content: space-between; align-items: center; margin: -1px 0 25px; color: var(--muted); font-size: 11px; }.options label { display: flex; gap: 6px; align-items: center; margin: 0; font-weight: 400; }.options a { color: var(--red); text-decoration: none; }
+			.submit { width: 100%; height: 52px; border: 0; border-radius: 7px; color: #fff; background: var(--red); font-size: 13px; font-weight: 700; }.submit:hover { background: #c9161d; }
+			.or { display: flex; gap: 12px; align-items: center; margin: 26px 0 17px; color: #aaa; font-size: 10px; }.or::before, .or::after { flex: 1; height: 1px; background: var(--line); content: ""; }
+			.kakao { width: 100%; height: 48px; border: 1px solid var(--line); border-radius: 7px; background: #fff; font-size: 12px; }.kakao::before { display: inline-grid; place-items: center; width: 19px; height: 19px; margin-right: 7px; border-radius: 50%; background: #fee500; content: "K"; font-size: 10px; font-weight: 700; }
+			.switch { margin: 22px 0 0; color: #aaa; font-size: 11px; text-align: center; }.switch button { padding: 0; border: 0; border-bottom: 1px solid var(--red); color: var(--red); background: none; font-size: inherit; }
+			.home { display: none; min-height: 100vh; background: #fafafa; }.home-header { display: flex; align-items: center; justify-content: space-between; height: 78px; padding: 0 7%; border-bottom: 1px solid var(--line); background: #fff; }.home-nav { display: flex; gap: 34px; margin-left: auto; margin-right: 34px; }.home-nav button { padding: 8px 0; border: 0; color: #888; background: none; font-size: 13px; }.home-nav button.active { color: var(--red); font-weight: 700; }.user-menu { color: #666; font-size: 12px; }.home-content { width: min(100% - 48px, 1060px); margin: 0 auto; padding: 56px 0 80px; }.home-title { display: flex; align-items: end; justify-content: space-between; margin-bottom: 30px; }.home-title h2 { margin: 0 0 8px; font-size: 30px; letter-spacing: -.07em; }.home-title p { margin: 0; color: var(--muted); font-size: 13px; }.add-job { padding: 11px 16px; border: 0; border-radius: 6px; color: #fff; background: var(--red); font-size: 12px; }.summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 36px; }.summary-card { padding: 19px 20px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }.summary-card p { margin: 0 0 10px; color: var(--muted); font-size: 11px; }.summary-card strong { font-size: 25px; }.summary-card:first-child strong { color: var(--red); }.application-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }.application-head h3 { margin: 0; font-size: 17px; letter-spacing: -.05em; }.application-head span { color: #999; font-size: 11px; }.application-list { border-top: 1px solid #333; background: #fff; }.application-row { display: grid; grid-template-columns: 1.45fr 1fr 1fr minmax(110px, 1fr) 42px; gap: 20px; align-items: center; min-height: 78px; padding: 0 22px; border-bottom: 1px solid var(--line); }.company-name { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 700; }.company-logo { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; color: #555; background: #f0f0f0; font-size: 11px; }.company-meta { color: #999; font-size: 11px; }.application-row select { width: 100%; padding: 8px 9px; border: 1px solid #ddd; border-radius: 5px; color: #555; background: #fff; font-size: 11px; }.application-row select:focus { border-color: var(--red); outline: 0; }.deadline { color: #888; font-size: 11px; }.empty-note { display: none; padding: 45px; color: #999; text-align: center; }.logout { margin-left: 15px; padding: 0; border: 0; color: #999; background: none; font-size: 11px; }
+			.home-title { margin-bottom: 30px; }.summary-card { cursor: pointer; transition: border-color .2s, box-shadow .2s; }.summary-card:hover, .summary-card.active { border-color: var(--red); box-shadow: 0 4px 14px rgba(227,27,35,.08); }.summary-card.active p { color: var(--red); }.filter-note { color: var(--red) !important; }.delete-application { padding: 5px; border: 0; color: #aaa; background: none; font-size: 11px; }.delete-application:hover { color: var(--red); }.apply-button { padding: 8px 10px; border: 1px solid var(--red); border-radius: 5px; color: var(--red); background: #fff; font-size: 10px; }.apply-button.added { color: #999; border-color: #ddd; background: #f5f5f5; }.job-company-info { padding: 7px 8px; border: 1px solid #ddd; border-radius: 5px; background: #fff; text-align: center; }.job-company-info:hover { border-color: var(--red); color: var(--red); }
+			.jobs { display: none; min-height: 100vh; background: #fafafa; }.jobs-content { width: min(100% - 48px, 1060px); margin: 0 auto; padding: 48px 0 80px; }.jobs-title { display: flex; align-items: end; justify-content: space-between; margin-bottom: 30px; }.jobs-title h2 { margin: 0 0 8px; font-size: 30px; letter-spacing: -.07em; }.jobs-title p { margin: 0; color: var(--muted); font-size: 13px; }.job-tabs { display: flex; gap: 22px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }.job-tabs button { padding: 0 0 13px; border: 0; border-bottom: 2px solid transparent; color: #aaa; background: none; font-size: 13px; }.job-tabs button.active { border-color: var(--red); color: var(--ink); font-weight: 700; }.job-list { border-top: 1px solid #333; background: #fff; }.job-row { display: grid; grid-template-columns: 1.5fr 115px 135px 1.1fr 88px 88px; gap: 14px; align-items: center; min-height: 88px; padding: 0 22px; border-bottom: 1px solid var(--line); }.job-company { padding: 0; border: 0; color: var(--ink); background: none; font-size: 13px; font-weight: 700; text-align: left; }.job-company:hover { color: var(--red); text-decoration: underline; }.job-role, .job-company-info, .job-deadline { color: #777; font-size: 11px; line-height: 1.55; }.fit-rate { padding: 0; border: 0; color: var(--red); background: none; font-size: 16px; font-weight: 700; text-align: left; }.fit-rate small { display: block; margin-top: 3px; color: #999; font-size: 10px; font-weight: 400; }.favorite { padding: 8px 9px; border: 1px solid #ddd; border-radius: 5px; color: #777; background: #fff; font-size: 10px; }.favorite.saved { border-color: var(--red); color: var(--red); background: var(--red-soft); }.job-labels { display: grid; grid-template-columns: 1.5fr 115px 135px 1.1fr 88px 88px; gap: 14px; padding: 11px 22px; color: #999; background: #fafafa; font-size: 10px; }.modal-backdrop { display: none; position: fixed; z-index: 10; inset: 0; place-items: center; padding: 24px; background: rgba(20,20,20,.35); }.modal { width: min(100%, 560px); max-height: 90vh; overflow: auto; padding: 30px; border-radius: 10px; background: #fff; box-shadow: 0 15px 40px rgba(0,0,0,.15); }.modal-head { display: flex; justify-content: space-between; align-items: start; margin-bottom: 25px; }.modal-head h3 { margin: 0 0 7px; font-size: 22px; letter-spacing: -.06em; }.modal-head p { margin: 0; color: #888; font-size: 12px; }.close { border: 0; color: #999; background: none; font-size: 20px; }.detail-section { padding: 18px 0; border-top: 1px solid var(--line); }.detail-section h4 { margin: 0 0 10px; font-size: 13px; }.detail-section p { margin: 0; color: #666; font-size: 12px; line-height: 1.8; }.fit-score { display: flex; align-items: center; gap: 18px; padding: 17px; border-radius: 7px; background: var(--red-soft); }.score { color: var(--red); font-size: 34px; font-weight: 700; }.fit-score p { margin: 0; color: #555; font-size: 12px; }.analysis-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }.analysis-list span { padding: 9px; border-radius: 5px; color: #55705b; background: #eff7ef; font-size: 11px; }.analysis-list span::before { margin-right: 5px; content: "✓"; }.modal-actions { display: flex; gap: 8px; margin-top: 20px; }.modal-actions button { flex: 1; height: 42px; border: 1px solid var(--line); border-radius: 5px; background: #fff; font-size: 12px; }.modal-actions button:last-child { border-color: var(--red); color: #fff; background: var(--red); }
+			.profile { display: none; min-height: 100vh; background: #fafafa; }.profile-content { width: min(100% - 48px, 1060px); margin: 0 auto; padding: 48px 0 80px; }.profile-title { margin-bottom: 30px; }.profile-title h2 { margin: 0 0 8px; font-size: 30px; letter-spacing: -.07em; }.profile-title p { margin: 0; color: var(--muted); font-size: 13px; }.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }.profile-card { border: 1px solid var(--line); border-radius: 8px; background: #fff; }.profile-card.projects { grid-column: 1 / -1; }.profile-card-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--line); }.profile-card-head h3 { margin: 0; font-size: 15px; }.profile-add { padding: 6px 10px; border: 1px solid #ddd; border-radius: 5px; color: #666; background: #fff; font-size: 11px; }.profile-item { display: flex; justify-content: space-between; gap: 14px; padding: 17px 20px; border-bottom: 1px solid #f0f0f0; }.profile-item strong { display: block; margin-bottom: 6px; font-size: 13px; }.profile-item p { margin: 0; color: #888; font-size: 11px; line-height: 1.6; }.item-actions { flex-shrink: 0; color: #999; font-size: 11px; }.item-actions button { padding: 2px 4px; border: 0; color: inherit; background: none; }.item-actions button:hover { color: var(--red); }.profile-form { display: grid; gap: 8px; }.profile-form label { margin-top: 7px; }.profile-form input, .profile-form textarea { width: 100%; padding: 11px; border: 1px solid var(--line); border-radius: 5px; outline: 0; font-size: 12px; }.profile-form textarea { min-height: 80px; resize: vertical; }.profile-type { color: var(--red); font-size: 11px; font-weight: 700; }
+			.pagination { display: flex; justify-content: center; gap: 8px; margin-top: 28px; }.pagination button { min-width: 28px; height: 28px; padding: 0 6px; border: 0; color: #999; background: transparent; font-size: 12px; }.pagination button.active { border-radius: 5px; color: #fff; background: var(--red); font-weight: 700; }.pagination .arrow { color: #777; font-size: 16px; }
+			@media (max-width: 760px) { .page { display: block; }.visual { min-height: 440px; padding: 25px 26px 22px; }.intro { margin-top: 54px; }.intro p { font-size: 13px; }.scene { height: 190px; min-height: 0; }.form-side { padding: 48px 26px 60px; }.note { right: 0; transform: scale(.85); transform-origin: right top; } }
+			@media (max-width: 760px) { .profile-content { width: calc(100% - 32px); padding-top: 36px; }.profile-grid { grid-template-columns: 1fr; }.profile-card.projects { grid-column: auto; } }
+			@media (max-width: 760px) { .home-header { height: auto; flex-wrap: wrap; gap: 18px; padding: 20px 24px; }.home-nav { order: 3; width: 100%; justify-content: space-between; margin: 0; }.home-content { width: calc(100% - 32px); padding-top: 36px; }.home-title { display: block; }.add-job { margin-top: 18px; }.summary { grid-template-columns: repeat(2, 1fr); }.application-row { grid-template-columns: 1.3fr 1fr 42px; gap: 10px; padding: 16px; }.application-row .deadline { display: none; }.application-row select { grid-column: 2; grid-row: 1; }.application-row .delete-application { grid-column: 3; grid-row: 1; }.company-meta { grid-column: 1; grid-row: 2; }.user-menu { margin-left: auto; } }
+			@media (max-width: 760px) { .jobs-content { width: calc(100% - 32px); padding-top: 36px; }.jobs-title h2 { font-size: 26px; }.job-labels { display: none; }.job-row { grid-template-columns: 1fr 84px 84px; gap: 8px; min-height: 104px; padding: 15px; }.job-company-info, .job-deadline { grid-column: 1; }.fit-rate { grid-column: 2 / 4; grid-row: 1; }.favorite { grid-column: 2; grid-row: 2; }.apply-button { grid-column: 3; grid-row: 2; }.job-company-info { font-size: 10px; text-align: left; }.job-deadline { font-size: 10px; }.modal { padding: 22px; }.analysis-list { grid-template-columns: 1fr; } }
+			.report { display: none; min-height: 100vh; background: #fafafa; }.report-content { width: min(100% - 48px, 1060px); margin: 0 auto; padding: 48px 0 80px; }.report-back { margin-bottom: 24px; padding: 8px 0; border: 0; color: #777; background: none; font-size: 12px; }.report-title { margin-bottom: 28px; }.report-title h2 { margin: 0 0 8px; font-size: 30px; letter-spacing: -.07em; }.report-title p { margin: 0; color: var(--muted); font-size: 13px; }.report-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }.report-card { min-height: 180px; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }.report-card small { color: var(--red); font-size: 10px; }.report-card h3 { margin: 14px 0 10px; font-size: 15px; }.report-card p { margin: 0 0 14px; color: #666; font-size: 12px; line-height: 1.7; }.report-card .relevance { color: #55705b; font-size: 11px; }
+		</style>
+	</head>
+	<body>
+		<main class="page" id="login-page">
+			<section class="visual">
+				<div class="logo"><span class="logo-mark">취</span> 취업했음청년</div>
+				<div class="intro"><small>YOUR CAREER, IN ONE PLACE</small><h1>취업했음<span>청년</span></h1><p>취준부터 첫 출근까지,<br />나의 취업 여정을 한눈에 관리해요.</p></div>
+				<div class="scene" aria-hidden="true"><div class="sun"></div><div class="ground"></div><div class="flag"></div><div class="person"><div class="head"></div><div class="hair"></div><div class="body"></div><div class="leg one"></div><div class="leg two"></div></div><div class="note">이번 주 목표<b>이력서 업데이트</b></div></div>
+				<div class="caption">매일 한 걸음씩, 원하는 곳에 닿으니까.</div>
+			</section>
+			<section class="form-side">
+				<div class="form-box">
+					<header><small>WELCOME</small><h2>다시 만났네요</h2><p>오늘도 취업했음청년과 함께 시작해요.</p></header>
+					<nav class="tabs"><button class="selected" type="button">로그인</button><button type="button">회원가입</button></nav>
+					<form onsubmit="event.preventDefault()">
+						<label for="email">이메일</label><input class="field" id="email" type="email" placeholder="이메일을 입력해 주세요" />
+						<label for="password">비밀번호</label><input class="field" id="password" type="password" placeholder="비밀번호를 입력해 주세요" />
+						<div class="options"><label><input type="checkbox" /> 로그인 상태 유지</label><a href="#">비밀번호 찾기</a></div>
+						<button class="submit" id="login-button" type="submit">로그인하기</button>
+					</form>
+					<div class="or"><span>또는</span></div><button class="kakao" type="button">카카오로 로그인하기</button>
+					<p class="switch">아직 회원이 아니신가요? <button type="button">회원가입하기</button></p>
+				</div>
+			</section>
+		</main>
+		<main class="home" id="home-page">
+			<header class="home-header">
+				<div class="logo"><span class="logo-mark">취</span> 취업했음청년</div>
+				<nav class="home-nav" aria-label="주요 메뉴"><button class="active" id="home-nav-button" type="button">HOME</button><button id="jobs-nav-button" type="button">채용공고</button><button id="profile-nav-button" type="button">내프로필</button></nav>
+				<div class="user-menu">김청년 <button class="logout" id="logout-button" type="button">로그아웃</button></div>
+			</header>
+			<section class="home-content">
+				<div class="home-title"><div><h2>지원 현황</h2><p>나의 취업 여정을 한눈에 확인해 보세요.</p></div></div>
+				<div class="summary"><button class="summary-card active" data-filter="all" type="button"><p>전체 지원</p><strong>8</strong></button><button class="summary-card" data-filter="active" type="button"><p>진행 중</p><strong>5</strong></button><button class="summary-card" data-filter="interview" type="button"><p>면접 예정</p><strong>2</strong></button><button class="summary-card" data-filter="pass" type="button"><p>최종합격</p><strong>1</strong></button></div>
+				<div class="application-head"><h3>내 지원 목록</h3><span>총 8개</span></div>
+				<div class="application-list">
+					<div class="application-row" data-status="active"><div class="company-name"><span class="company-logo">SK</span> SK텔레콤</div><div class="company-meta">서비스 기획 · 신입</div><div class="deadline">지원일 2026.08.21</div><select aria-label="SK텔레콤 지원 상태"><option>서류준비</option><option selected>지원완료</option><option>코딩테스트 (필기시험)</option><option>1차면접</option><option>2차면접</option><option>최종면접</option><option>탈락</option><option>최종합격</option></select><button class="delete-application" type="button">삭제</button></div>
+					<div class="application-row" data-status="interview"><div class="company-name"><span class="company-logo">N</span> 네이버</div><div class="company-meta">프론트엔드 개발 · 신입</div><div class="deadline">지원일 2026.08.18</div><select aria-label="네이버 지원 상태"><option>서류준비</option><option>지원완료</option><option>코딩테스트 (필기시험)</option><option selected>1차면접</option><option>2차면접</option><option>최종면접</option><option>탈락</option><option>최종합격</option></select><button class="delete-application" type="button">삭제</button></div>
+					<div class="application-row" data-status="pass"><div class="company-name"><span class="company-logo">K</span> 카카오</div><div class="company-meta">백엔드 개발 · 신입</div><div class="deadline">지원일 2026.08.10</div><select aria-label="카카오 지원 상태"><option>서류준비</option><option>지원완료</option><option>코딩테스트 (필기시험)</option><option>1차면접</option><option>2차면접</option><option>최종면접</option><option>탈락</option><option selected>최종합격</option></select><button class="delete-application" type="button">삭제</button></div>
+					<div class="application-row" data-status="active"><div class="company-name"><span class="company-logo">L</span> LG전자</div><div class="company-meta">UX/UI 디자인 · 신입</div><div class="deadline">지원일 2026.08.03</div><select aria-label="LG전자 지원 상태"><option selected>서류준비</option><option>지원완료</option><option>코딩테스트 (필기시험)</option><option>1차면접</option><option>2차면접</option><option>최종면접</option><option>탈락</option><option>최종합격</option></select><button class="delete-application" type="button">삭제</button></div>
+				</div>
+			</section>
+		</main>
+		<main class="jobs" id="jobs-page">
+			<header class="home-header"><div class="logo"><span class="logo-mark">취</span> 취업했음청년</div><nav class="home-nav" aria-label="주요 메뉴"><button id="jobs-home-button" type="button">HOME</button><button class="active" type="button">채용공고</button><button id="jobs-profile-button" type="button">내프로필</button></nav><div class="user-menu">김청년 <button class="logout jobs-logout" type="button">로그아웃</button></div></header>
+			<section class="jobs-content">
+				<div class="jobs-title"><div><h2>채용공고</h2><p>내게 맞는 기회를 찾아보세요.</p></div></div>
+				<nav class="job-tabs"><button class="active" type="button">전체공고</button><button type="button">선호공고</button></nav>
+				<div class="job-labels"><span>회사 / 포지션</span><span>예상 합격률</span><span>마감기한</span><span>회사정보</span><span>선호공고</span><span>지원</span></div>
+				<div class="job-list">
+					<div class="job-row"><button class="job-company" data-modal="detail-modal">SK텔레콤<br /><small class="job-role">서비스 기획 · 신입</small></button><button class="fit-rate" data-modal="fit-modal">86%<small>AI 적합도</small></button><span class="job-deadline">2026.09.18<br />D-15</span><button class="job-company-info" data-modal="company-modal">회사정보</button><button class="favorite" type="button">☆ 추가</button><button class="apply-button" data-company="SK텔레콤" type="button">지원 추가</button></div>
+					<div class="job-row"><button class="job-company" data-modal="detail-modal">네이버<br /><small class="job-role">프론트엔드 개발 · 신입</small></button><button class="fit-rate" data-modal="fit-modal">74%<small>AI 적합도</small></button><span class="job-deadline">2026.09.12<br />D-9</span><button class="job-company-info" data-modal="company-modal">회사정보</button><button class="favorite saved" type="button">♥ 저장됨</button><button class="apply-button added" data-company="네이버" type="button">지원완료</button></div>
+					<div class="job-row"><button class="job-company" data-modal="detail-modal">카카오<br /><small class="job-role">백엔드 개발 · 신입</small></button><button class="fit-rate" data-modal="fit-modal">68%<small>AI 적합도</small></button><span class="job-deadline">2026.09.25<br />D-22</span><button class="job-company-info" data-modal="company-modal">회사정보</button><button class="favorite" type="button">☆ 추가</button><button class="apply-button" data-company="카카오" type="button">지원 추가</button></div>
+					<div class="job-row"><button class="job-company" data-modal="detail-modal">현대자동차<br /><small class="job-role">데이터 분석 · 신입</small></button><button class="fit-rate" data-modal="fit-modal">79%<small>AI 적합도</small></button><span class="job-deadline">2026.10.02<br />D-29</span><button class="job-company-info" data-modal="company-modal">회사정보</button><button class="favorite" type="button">☆ 추가</button><button class="apply-button" data-company="현대자동차" type="button">지원 추가</button></div>
+					<div class="job-row"><button class="job-company" data-modal="detail-modal">토스<br /><small class="job-role">프로덕트 매니저 · 신입</small></button><button class="fit-rate" data-modal="fit-modal">82%<small>AI 적합도</small></button><span class="job-deadline">2026.10.05<br />D-32</span><button class="job-company-info" data-modal="company-modal">회사정보</button><button class="favorite" type="button">☆ 추가</button><button class="apply-button" data-company="토스" type="button">지원 추가</button></div>
+					<div class="job-row"><button class="job-company" data-modal="detail-modal">삼성전자<br /><small class="job-role">UX 리서처 · 신입</small></button><button class="fit-rate" data-modal="fit-modal">71%<small>AI 적합도</small></button><span class="job-deadline">2026.10.10<br />D-37</span><button class="job-company-info" data-modal="company-modal">회사정보</button><button class="favorite" type="button">☆ 추가</button><button class="apply-button" data-company="삼성전자" type="button">지원 추가</button></div>
+				</div>
+				<div class="pagination" aria-label="채용공고 페이지 이동"><button class="arrow" type="button" aria-label="이전 페이지">‹</button><button class="active" type="button">1</button><button type="button">2</button><button type="button">3</button><button class="arrow" type="button" aria-label="다음 페이지">›</button></div>
+			</section>
+		</main>
+		<main class="profile" id="profile-page">
+			<header class="home-header"><div class="logo"><span class="logo-mark">취</span> 취업했음청년</div><nav class="home-nav" aria-label="주요 메뉴"><button id="profile-home-button" type="button">HOME</button><button id="profile-jobs-button" type="button">채용공고</button><button class="active" type="button">내프로필</button></nav><div class="user-menu">김청년 <button class="logout profile-logout" type="button">로그아웃</button></div></header>
+			<section class="profile-content"><div class="profile-title"><h2>내 프로필</h2><p>나의 경험과 역량을 등록해 AI 예상 합격률을 높여보세요.</p></div><div class="profile-grid">
+				<article class="profile-card"><div class="profile-card-head"><h3>학력</h3><button class="profile-add" data-profile-add="학력">+ 추가</button></div><div class="profile-item"><div><strong>서울대학교</strong><p>컴퓨터공학과 · 졸업<br />2019.03 - 2025.02</p></div><div class="item-actions"><button data-profile-edit="학력">수정</button> | <button data-profile-delete>삭제</button></div></div></article>
+				<article class="profile-card"><div class="profile-card-head"><h3>자격증</h3><button class="profile-add" data-profile-add="자격증">+ 추가</button></div><div class="profile-item"><div><strong>정보처리기사</strong><p>한국산업인력공단 · 2024.06</p></div><div class="item-actions"><button data-profile-edit="자격증">수정</button> | <button data-profile-delete>삭제</button></div></div></article>
+				<article class="profile-card"><div class="profile-card-head"><h3>경력</h3><button class="profile-add" data-profile-add="경력">+ 추가</button></div><div class="profile-item"><div><strong>스타트업 A</strong><p>서비스 기획 인턴 · 6개월<br />2024.07 - 2024.12</p></div><div class="item-actions"><button data-profile-edit="경력">수정</button> | <button data-profile-delete>삭제</button></div></div></article>
+				<article class="profile-card"><div class="profile-card-head"><h3>수상</h3><button class="profile-add" data-profile-add="수상">+ 추가</button></div><div class="profile-item"><div><strong>교내 창업 경진대회 우수상</strong><p>서울대학교 · 2023.11</p></div><div class="item-actions"><button data-profile-edit="수상">수정</button> | <button data-profile-delete>삭제</button></div></div></article>
+				<article class="profile-card projects"><div class="profile-card-head"><h3>프로젝트</h3><button class="profile-add" data-profile-add="프로젝트">+ 추가</button></div><div class="profile-item"><div><strong>취업대시보드 서비스 기획</strong><p>사용자 지원 현황과 AI 적합도 분석 기능을 기획하고 프로토타입 제작</p></div><div class="item-actions"><button data-profile-edit="프로젝트">수정</button> | <button data-profile-delete>삭제</button></div></div></article>
+			</div></section>
+		</main>
+		<div class="modal-backdrop" id="profile-form-modal"><article class="modal"><div class="modal-head"><div><span class="profile-type" id="profile-form-type">학력</span><h3 id="profile-form-title">학력 추가</h3></div><button class="close" type="button">×</button></div><form class="profile-form" id="profile-form"><label for="profile-name">이름 / 기관</label><input id="profile-name" placeholder="학교, 회사, 자격증 이름" required /><label for="profile-detail">상세 내용</label><input id="profile-detail" placeholder="전공, 직무, 발급기관 등" required /><label for="profile-period">기간</label><input id="profile-period" placeholder="예: 2022.03 - 2024.02" /><label for="profile-description">설명</label><textarea id="profile-description" placeholder="주요 내용이나 성과를 입력해 주세요"></textarea><div class="modal-actions"><button class="close" type="button">취소</button><button type="submit">저장하기</button></div></form></article></div>
+		<div class="modal-backdrop" id="detail-modal"><article class="modal"><div class="modal-head"><div><h3>SK텔레콤 서비스 기획</h3><p>신입 · 정규직 · 서울</p></div><button class="close" type="button">×</button></div><div class="detail-section"><h4>주요 업무</h4><p>고객 경험을 개선하는 서비스 기획과 신규 기능의 기획, 운영을 담당합니다.</p></div><div class="detail-section"><h4>지원자격</h4><p>서비스 기획 경험 또는 프로젝트 경험이 있는 분<br />데이터 기반으로 문제를 정의하고 해결할 수 있는 분</p></div><div class="detail-section"><h4>우대사항</h4><p>IT 서비스 및 플랫폼에 대한 관심과 이해도가 높은 분<br />협업 툴을 활용한 프로젝트 경험이 있는 분</p></div><div class="modal-actions"><button class="close" type="button">닫기</button><button type="button">지원하기</button></div></article></div>
+		<div class="modal-backdrop" id="fit-modal"><article class="modal"><div class="modal-head"><div><h3>AI 적합도 분석</h3><p>SK텔레콤 서비스 기획 · 내 프로필 비교</p></div><button class="close" type="button">×</button></div><div class="fit-score"><strong class="score">86%</strong><p>내 프로필과 공고를 분석한<br />예상 합격률입니다.</p></div><div class="detail-section"><h4>분석 결과</h4><div class="analysis-list"><span>서비스 기획 프로젝트 3건</span><span>직무 역량 키워드 일치</span><span>관련 교육 이수</span><span>경력 요건 보완 필요</span></div></div><div class="detail-section"><h4>AI 추천</h4><p>포트폴리오에 데이터 기반 성과를 추가하면 적합도를 더 높일 수 있어요.</p></div><div class="modal-actions"><button class="close" type="button">닫기</button><button type="button">내 프로필 보기</button></div></article></div>
+		<div class="modal-backdrop" id="company-modal"><article class="modal"><div class="modal-head"><div><h3>SK텔레콤</h3><p>AI와 ICT로 더 나은 연결을 만드는 기업</p></div><button class="close" type="button">×</button></div><div class="detail-section"><h4>회사 한눈에 보기</h4><p>대한민국 대표 ICT 기업으로 통신, 미디어, AI 분야의 서비스를 제공합니다.</p></div><div class="detail-section"><h4>인재상</h4><p>도전과 실행 · 고객 중심 · 협업과 성장</p></div><div class="detail-section"><h4>관련 자료</h4><p>등록 특허 1,240건 · 관련 논문 86편 · 산업 보고서 24건</p></div><div class="modal-actions"><button class="company-report-button" type="button">맞춤 기업 리포트</button><button type="button">회사 홈페이지</button></div></article></div>
+		<main class="report" id="report-page"><header class="home-header"><div class="logo"><span class="logo-mark">취</span> 취업대시보드</div><nav class="home-nav"><button id="report-jobs-button" type="button">채용공고</button><button class="active" type="button">맞춤 기업 리포트</button></nav><div class="user-menu">김청년</div></header><section class="report-content"><button class="report-back" id="report-back-button" type="button">← 채용공고로 돌아가기</button><div class="report-title"><h2>SK텔레콤 맞춤 기업 리포트</h2><p>내 프로필과 관련성이 높은 기업 자료를 AI가 모아봤어요.</p></div><div class="report-grid"><article class="report-card"><small>특허</small><h3>AI 기반 개인화 추천 기술</h3><p>내 프로필의 서비스 기획 경험과 연결되는 SK텔레콤의 최근 특허입니다.</p><small class="relevance">관련도 92%</small></article><article class="report-card"><small>논문</small><h3>초거대 AI 서비스의 사용자 경험</h3><p>서비스 기획 직무와 관련된 연구 주제를 AI가 선별했습니다.</p><small class="relevance">관련도 87%</small></article><article class="report-card"><small>보고서</small><h3>2026 ICT 산업 전망 보고서</h3><p>지원 직무와 기업의 사업 방향을 이해하는 데 도움이 되는 자료입니다.</p><small class="relevance">관련도 81%</small></article></div></section></main>
+		<script>
+			function showPage(page) {
+				document.getElementById('login-page').style.display = page === 'login' ? 'grid' : 'none'
+				document.getElementById('home-page').style.display = page === 'home' ? 'block' : 'none'
+				document.getElementById('jobs-page').style.display = page === 'jobs' ? 'block' : 'none'
+				document.getElementById('profile-page').style.display = page === 'profile' ? 'block' : 'none'
+				document.getElementById('report-page').style.display = page === 'report' ? 'block' : 'none'
+				document.querySelector('#report-page .logo').lastChild.textContent = ' 취업했음청년'
+				document.title = page === 'jobs' ? '취업했음청년 | 채용공고' : page === 'profile' ? '취업했음청년 | 내 프로필' : page === 'report' ? '취업했음청년 | 맞춤 기업 리포트' : page === 'home' ? '취업했음청년 | HOME' : '취업했음청년 | 로그인'
+			}
+
+			document.getElementById('login-button').addEventListener('click', function () {
+				showPage('home')
+			})
+			document.getElementById('jobs-nav-button').addEventListener('click', function () { showPage('jobs') })
+			document.getElementById('jobs-home-button').addEventListener('click', function () { showPage('home') })
+			document.getElementById('home-nav-button').addEventListener('click', function () { showPage('home') })
+			document.getElementById('profile-nav-button').addEventListener('click', function () { showPage('profile') })
+			document.getElementById('jobs-profile-button').addEventListener('click', function () { showPage('profile') })
+			document.getElementById('profile-home-button').addEventListener('click', function () { showPage('home') })
+			document.getElementById('profile-jobs-button').addEventListener('click', function () { showPage('jobs') })
+			document.getElementById('report-jobs-button').addEventListener('click', function () { showPage('jobs') })
+			document.getElementById('report-back-button').addEventListener('click', function () { showPage('jobs') })
+			document.getElementById('logout-button').addEventListener('click', function () {
+				showPage('login')
+			})
+			document.querySelector('.jobs-logout').addEventListener('click', function () { showPage('login') })
+			document.querySelector('.profile-logout').addEventListener('click', function () { showPage('login') })
+			document.querySelectorAll('[data-modal]').forEach(function (button) {
+				button.addEventListener('click', function () { document.getElementById(button.dataset.modal).style.display = 'grid' })
+			})
+			document.querySelector('.company-report-button').addEventListener('click', function () {
+				document.getElementById('company-modal').style.display = 'none'
+				showPage('report')
+			})
+			document.querySelectorAll('.close').forEach(function (button) {
+				button.addEventListener('click', function () { button.closest('.modal-backdrop').style.display = 'none' })
+			})
+			document.querySelectorAll('.favorite').forEach(function (button) {
+				button.addEventListener('click', function () {
+					button.classList.toggle('saved')
+					button.textContent = button.classList.contains('saved') ? '♥ 저장됨' : '☆ 추가'
+				})
+			})
+			document.querySelectorAll('.apply-button').forEach(function (button) {
+				button.addEventListener('click', function () {
+					if (button.classList.contains('added')) return
+					var row = document.createElement('div')
+					row.className = 'application-row'
+					row.dataset.status = 'active'
+					row.innerHTML = '<div class="company-name"><span class="company-logo">' + button.dataset.company.slice(0, 1) + '</span> ' + button.dataset.company + '</div><div class="company-meta">채용공고 · 신입</div><div class="deadline">오늘 지원</div><select aria-label="' + button.dataset.company + ' 지원 상태"><option selected>지원완료</option><option>코딩테스트 (필기시험)</option><option>1차면접</option><option>최종면접</option><option>탈락</option><option>최종합격</option></select><button class="delete-application" type="button">삭제</button>'
+					document.querySelector('.application-list').appendChild(row)
+					button.classList.add('added')
+					button.textContent = '지원완료'
+				})
+			})
+			document.querySelector('.application-list').addEventListener('click', function (event) {
+				var deleteButton = event.target.closest('.delete-application')
+				if (deleteButton) deleteButton.closest('.application-row').remove()
+			})
+			var currentFilter = 'all'
+			function filterApplications(filter) {
+				currentFilter = filter
+				document.querySelectorAll('.summary-card').forEach(function (card) { card.classList.toggle('active', card.dataset.filter === filter) })
+				document.querySelectorAll('.application-row').forEach(function (row) {
+					var visible = filter === 'all' || (filter === 'active' && row.dataset.status !== 'rejected') || row.dataset.status === filter
+					row.style.display = visible ? 'grid' : 'none'
+				})
+				document.querySelector('.application-head span').textContent = filter === 'all' ? '전체 지원' : filter === 'active' ? '진행 중' : filter === 'interview' ? '면접 예정' : '최종합격'
+			}
+			document.querySelectorAll('.summary-card').forEach(function (card) { card.addEventListener('click', function () { filterApplications(card.dataset.filter) }) })
+			document.querySelectorAll('.application-row select').forEach(function (select) {
+				select.addEventListener('change', function () {
+					var status = select.value
+					select.closest('.application-row').dataset.status = status === '탈락' ? 'rejected' : status === '최종합격' ? 'pass' : ['1차면접', '2차면접', '최종면접'].includes(status) ? 'interview' : 'active'
+					filterApplications(currentFilter)
+				})
+			})
+			document.querySelectorAll('[data-profile-add], [data-profile-edit]').forEach(function (button) {
+				button.addEventListener('click', function () {
+					var type = button.dataset.profileAdd || button.dataset.profileEdit
+					document.getElementById('profile-form-type').textContent = type
+					document.getElementById('profile-form-title').textContent = type + (button.dataset.profileEdit ? ' 수정' : ' 추가')
+					document.getElementById('profile-form-modal').style.display = 'grid'
+				})
+			})
+			document.querySelectorAll('[data-profile-delete]').forEach(function (button) {
+				button.addEventListener('click', function () { button.closest('.profile-item').remove() })
+			})
+			document.getElementById('profile-form').addEventListener('submit', function (event) {
+				event.preventDefault()
+				document.getElementById('profile-form-modal').style.display = 'none'
+			})
+			document.querySelectorAll('.job-tabs button').forEach(function (tab, index) {
+				tab.addEventListener('click', function () {
+					document.querySelectorAll('.job-tabs button').forEach(function (item) { item.classList.remove('active') })
+					tab.classList.add('active')
+					document.querySelectorAll('.job-row').forEach(function (row) { row.style.display = index === 0 || row.querySelector('.favorite').classList.contains('saved') ? 'grid' : 'none' })
+				})
+			})
+			var jobRows = document.querySelectorAll('.job-row')
+			var pageButtons = document.querySelectorAll('.pagination button:not(.arrow)')
+			function renderJobPage(page) {
+				jobRows.forEach(function (row, index) { row.style.display = index >= (page - 1) * 3 && index < page * 3 ? 'grid' : 'none' })
+				pageButtons.forEach(function (button, index) { button.classList.toggle('active', index + 1 === page) })
+			}
+			pageButtons.forEach(function (button, index) { button.addEventListener('click', function () { renderJobPage(index + 1) }) })
+			document.querySelector('.pagination .arrow').addEventListener('click', function () { renderJobPage(1) })
+			document.querySelectorAll('.pagination .arrow')[1].addEventListener('click', function () { renderJobPage(3) })
+			renderJobPage(1)
+		</script>
+	</body>
+</html>

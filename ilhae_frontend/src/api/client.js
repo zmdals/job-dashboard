@@ -143,12 +143,47 @@ export const api = {
   // My Specs
   // =========================
 
+  // 학력 전체 조회
+  getEducations() {
+    return request("/me/educations");
+  },
+
+  // 학력 상세 조회
+  getEducation(educationId) {
+    return request(`/me/educations/${educationId}`);
+  },
+
   // 학력 추가
   addEducation(payload) {
     return request("/me/educations", {
       method: "POST",
       body: JSON.stringify(payload),
     });
+  },
+
+  // 학력 수정
+  updateEducation(educationId, payload) {
+    return request(`/me/educations/${educationId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // 학력 삭제
+  deleteEducation(educationId) {
+    return request(`/me/educations/${educationId}`, {
+      method: "DELETE",
+    });
+  },
+
+  // 경력 전체 조회
+  getCareers() {
+    return request("/me/careers");
+  },
+
+  // 경력 상세 조회
+  getCareer(careerId) {
+    return request(`/me/careers/${careerId}`);
   },
 
   // 경력 추가
@@ -159,11 +194,51 @@ export const api = {
     });
   },
 
+  // 경력 수정
+  updateCareer(careerId, payload) {
+    return request(`/me/careers/${careerId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // 경력 삭제
+  deleteCareer(careerId) {
+    return request(`/me/careers/${careerId}`, {
+      method: "DELETE",
+    });
+  },
+
+  // 프로젝트 전체 조회
+  getProjects() {
+    return request("/me/projects");
+  },
+
+  // 프로젝트 상세 조회
+  getProject(projectId) {
+    return request(`/me/projects/${projectId}`);
+  },
+
   // 프로젝트 추가
   addProject(payload) {
     return request("/me/projects", {
       method: "POST",
       body: JSON.stringify(payload),
+    });
+  },
+
+  // 프로젝트 수정
+  updateProject(projectId, payload) {
+    return request(`/me/projects/${projectId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // 프로젝트 삭제
+  deleteProject(projectId) {
+    return request(`/me/projects/${projectId}`, {
+      method: "DELETE",
     });
   },
 
@@ -235,17 +310,35 @@ export const api = {
     return request("/users/me");
   },
 
+  // 자격증 전체 조회
+  getCertificates() {
+    return request("/me/certificates");
+  },
+
+  // 자격증 상세 조회
+  getCertificate(certificateId) {
+    return request(`/me/certificates/${certificateId}`);
+  },
+
   // 자격증 추가
   addCertificate(payload) {
-    return request("/users/me/certificates", {
+    return request("/me/certificates", {
       method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // 자격증 수정
+  updateCertificate(certificateId, payload) {
+    return request(`/me/certificates/${certificateId}`, {
+      method: "PUT",
       body: JSON.stringify(payload),
     });
   },
 
   // 자격증 삭제
   deleteCertificate(certificateId) {
-    return request(`/users/me/certificates/${certificateId}`, {
+    return request(`/me/certificates/${certificateId}`, {
       method: "DELETE",
     });
   },

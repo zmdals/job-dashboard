@@ -1,152 +1,162 @@
 <script setup>
 import { ref } from 'vue';
 import InfoCard from '@/components/InfoCard.vue';
+
 import EditableTimeLineGroup from '@/components/EditableTimeLineGroup.vue';
-import ProfileFormModal from '@/components/ProfileFormModal.vue';
+import EditableChipGroup from '@/components/EditableChipGroup.vue';
+
+function useTimelineActions(listRef, idKey) {
+    function add() {
+        listRef.value.push({ [idKey]: Date.now(), title: '', period: '', extra: '' })
+    }
+    function remove(id) {
+        listRef.value = listRef.value.filter(item => item[idKey] !== id)
+    }
+    return { add, remove }
+}
 
 const education = ref([
     {
-        id: 1,
-        name: '한국대학교',
-        detail: '생명공학과 · 학사',
+        education_id: 1,
+        title: '한국대학교 생명공학과 학사',
         period: '2019.03 – 2023.02',
-        description: '학점 3.72 / 4.5',
+        extra: '학점 3.72 / 4.5',
     },
     {
-        id: 2,
-        name: '한국대학교 대학원',
-        detail: '생물공정 전공 · 재학',
+        education_id: 2,
+        title: '한국대학교 대학원 (재학)',
         period: '2023.03 – ',
-        description: '',
+        extra: '생물공정 전공',
     },
 ])
 
 const career = ref([
     {
-        id: 1,
-        name: '바이오공정연구실',
-        detail: '학부연구생',
+        career_id: 1,
+        title: '바이오공정연구실 학부연구생',
         period: '2022.01 – 2023.02',
-        description: '14개월 · 세포배양·정제 실험',
+        extra: '14개월 · 세포배양·정제 실험',
     },
     {
-        id: 2,
-        name: '한빛소재',
-        detail: '하계 인턴',
+        career_id: 2,
+        title: '한빛소재 하계 인턴',
         period: '2024.07 – 2024.08',
-        description: '품질분석 보조',
+        extra: '품질분석 보조',
     },
 ])
 
 const projects = ref([
     {
-        id: 1,
-        name: '교내 캡스톤 경진대회 장려상',
-        detail: '',
+        projects_id: 1,
+        title: '교내 캡스톤 경진대회 장려상',
         period: '2022.11',
-        description: '미생물 배양 자동화',
+        extra: '미생물 배양 자동화',
     },
 ])
 
 const certificates = ref([
-    { id: 1, name: '화학분석기사', detail: '몰라', period: '2024.05', description: '몰라' },
-    { id: 2, name: 'OPIc IM2', detail: '', period: '2025.03', description: '' },
-    { id: 3, name: 'GMP 교육 수료', detail: '', period: '', description: '' },
+    { certificate_id: 1, cert_name: '화학분석기사', acquired_date: '2024.05' },
+    { certificate_id: 2, cert_name: 'OPIc IM2', acquired_date: '2025.03' },
+    { certificate_id: 3, cert_name: 'GMP 교육 수료', acquired_date: '' },
 ])
 
 const awards = ref([
     {
-        id: 1,
-        name: '교내 캡스톤 경진대회 장려상',
-        detail: '',
-        period: '2022.11',
-        description: '미생물 배양 자동화',
+        award_id: 1,
+        award_name: '교내 캡스톤 경진대회 장려상',
+        award_date: '2022.11',
+        organizer: '미생물 배양 자동화',
     },
 ])
 
-function removeItem(list, id) {
-    const index = list.findIndex(item => item.id === id)
-    if (index !== -1) list.splice(index, 1)
-}
+const { add: addEducation, remove: removeEducation } = useTimelineActions(education, 'education_id')
+const { add: addCareer, remove: removeCareer } = useTimelineActions(career, 'career_id')
+const { add: addProject, remove: removeProject } = useTimelineActions(projects, 'projects_id')
+const { add: addAward, remove: removeAward } = useTimelineActions(awards, 'award_id')
 
-const modalState = ref(null)
-// { category, mode: 'add' | 'edit', list, item }
-
-function openAddModal(category, list) {
-    modalState.value = { category, mode: 'add', list, item: { name: '', detail: '', period: '', description: '' } }
+function addCertificate() {
+    certificates.value.push({ certificate_id: Date.now(), cert_name: '', acquired_date: '' })
 }
-function openEditModal(category, list, item) {
-    modalState.value = { category, mode: 'edit', list, item }
-}
-function closeModal() {
-    modalState.value = null
-}
-function saveModal(formValue) {
-    const { mode, list, item } = modalState.value
-    if (mode === 'add') {
-        list.push({ id: Date.now(), ...formValue })
-    } else {
-        const index = list.findIndex(i => i.id === item.id)
-        if (index !== -1) list[index] = { ...item, ...formValue }
-    }
-    closeModal()
+function removeCertificate(id) {
+    certificates.value = certificates.value.filter(c => c.certificate_id !== id)
 }
 </script>
 
 <template>
     <h2 class="page-title">내정보</h2>
     <div class="info-grid">
-        <InfoCard title="학력" @add="openAddModal('학력', education)">
+        <InfoCard title="학력" v-slot="{ editing }">
             <EditableTimeLineGroup
                 :items="education"
-                idKey="id"
-                @edit="item => openEditModal('학력', education, item)"
-                @remove="id => removeItem(education, id)"
+                idKey="education_id"
+                :editing="editing"
+                :fields="[
+                    {key:'title', label:'학교・전공'},
+                    { key: 'period', label: '기간' },
+                    { key: 'extra', label: '비고' },
+                ]"
+                @add="addEducation"
+                @remove="removeEducation"
             ></EditableTimeLineGroup>
         </InfoCard>
-        <InfoCard title="자격증 · 어학" @add="openAddModal('자격증 · 어학', certificates)">
-            <EditableTimeLineGroup
-                :items="certificates"
-                idKey="id"
-                @edit="item => openEditModal('자격증 · 어학', certificates, item)"
-                @remove="id => removeItem(certificates, id)"
-            ></EditableTimeLineGroup>
-        </InfoCard>
-        <InfoCard title="경력" @add="openAddModal('경력', career)">
+        <InfoCard title="경력" v-slot="{editing}">
             <EditableTimeLineGroup
                 :items="career"
-                idKey="id"
-                @edit="item => openEditModal('경력', career, item)"
-                @remove="id => removeItem(career, id)"
+                idKey="career_id"
+                :editing="editing"
+                :fields="[
+                    {key:'title', label:'경력'},
+                    {key:'period', label:'기간'},
+                    {key:'extra', label:'비고'},
+                ]"
+                @add="addCareer"
+                @remove="removeCareer"
             ></EditableTimeLineGroup>
         </InfoCard>
-        <InfoCard title="수상경력" @add="openAddModal('수상경력', awards)">
-            <EditableTimeLineGroup
-                :items="awards"
-                idKey="id"
-                @edit="item => openEditModal('수상경력', awards, item)"
-                @remove="id => removeItem(awards, id)"
-            ></EditableTimeLineGroup>
-        </InfoCard>
-        <InfoCard title="프로젝트" class="full-width" @add="openAddModal('프로젝트', projects)">
+        <InfoCard title="프로젝트" v-slot="{editing}">
             <EditableTimeLineGroup
                 :items="projects"
-                idKey="id"
-                @edit="item => openEditModal('프로젝트', projects, item)"
-                @remove="id => removeItem(projects, id)"
+                idKey="projects_id"
+                :editing="editing"
+                :fields="[
+                    {key:'title', label:'프로젝트명'},
+                    {key:'period', label:'기간'},
+                    {key:'extra', label:'비고'},
+                ]"
+                @add="addProject"
+                @remove="removeProject"
             ></EditableTimeLineGroup>
         </InfoCard>
-        <InfoCard title="희망 취업 조건" class="full-width"></InfoCard>
+        <InfoCard title="자격증 · 어학" v-slot="{ editing }">
+            <EditableChipGroup
+                :items="certificates"
+                idKey="certificate_id"
+                :editing="editing"
+                labelKey="cert_name"
+                labelText="자격증・어학명"
+                metaKey="acquired_date"
+                metaText="취득일"
+                @add="addCertificate"
+                @remove="removeCertificate"
+            ></EditableChipGroup>
+        </InfoCard>
+        <InfoCard title="수상경력"  v-slot="{editing}">
+            <EditableTimeLineGroup
+                :items="awards"
+                idKey="award_id"
+                :editing="editing"
+                :fields="[
+                    {key:'award_name', label:'수상'},
+                    {key:'award_date', label:'수상 날짜'},
+                    {key:'organizer', label:'비고'},
+                ]"
+                @add="addAward"
+                @remove="removeAward"
+            ></EditableTimeLineGroup>
+            
+        </InfoCard>
+        <InfoCard title="희망 취업 조건"></InfoCard>
     </div>
-
-    <ProfileFormModal
-        v-if="modalState"
-        :category="modalState.category"
-        :mode="modalState.mode"
-        :item="modalState.item"
-        @save="saveModal"
-        @close="closeModal"
-    ></ProfileFormModal>
 </template>
 
 <style scoped>
@@ -162,10 +172,6 @@ function saveModal(formValue) {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     align-items: start;
-}
-
-.info-grid :deep(.full-width) {
-    grid-column: 1 / -1;
 }
 
 </style>

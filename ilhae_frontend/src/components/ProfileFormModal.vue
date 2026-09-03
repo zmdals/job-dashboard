@@ -5,36 +5,58 @@ import ModalBox from './LegoBox/ModalBox.vue';
 const props = defineProps({
     category: { type: String, required: true },
     mode: { type: String, default: 'add' },
-    item: {
-        type: Object,
-        default: () => ({ name: '', detail: '', period: '', description: '' }),
-    },
+    // [{ key, label, type: 'text'|'date'|'number'|'select'|'textarea', placeholder?, options?: [{value,label}] }]
+    fields: { type: Array, required: true },
+    item: { type: Object, default: () => ({}) },
 })
 const emit = defineEmits(['save', 'close'])
 
-const form = ref({ ...props.item })
+function buildForm(item) {
+    const result = {}
+    props.fields.forEach((field) => {
+        result[field.key] = item[field.key] ?? (field.type === 'number' ? null : '')
+    })
+    return result
+}
+
+const form = ref(buildForm(props.item))
 watch(() => props.item, (val) => {
-    form.value = { ...val }
+    form.value = buildForm(val)
 })
 
 const modalTitle = computed(() => `${props.category} ${props.mode === 'edit' ? '수정' : '추가'}`)
 
 function submit() {
-    emit('save', { ...form.value })
+    const payload = { ...form.value }
+    props.fields.forEach((field) => {
+        if (field.type === 'number' && payload[field.key] !== '' && payload[field.key] !== null) {
+            payload[field.key] = Number(payload[field.key])
+        }
+    })
+    emit('save', payload)
 }
 </script>
 
 <template>
     <ModalBox :title="category" :subtitle="modalTitle" @close="$emit('close')">
         <form class="profile-form" @submit.prevent="submit">
-            <label>이름 / 기관</label>
-            <input v-model="form.name" placeholder="학교, 회사, 자격증 이름" />
-            <label>상세 내용</label>
-            <input v-model="form.detail" placeholder="전공, 직무, 발급기관 등" />
-            <label>기간</label>
-            <input v-model="form.period" placeholder="예: 2022.03 - 2024.02" />
-            <label>설명</label>
-            <textarea v-model="form.description" placeholder="주요 내용이나 성과를 입력해 주세요"></textarea>
+            <template v-for="field in fields" :key="field.key">
+                <label>{{ field.label }}</label>
+                <select v-if="field.type === 'select'" v-model="form[field.key]">
+                    <option v-for="opt in field.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                </select>
+                <textarea
+                    v-else-if="field.type === 'textarea'"
+                    v-model="form[field.key]"
+                    :placeholder="field.placeholder"
+                ></textarea>
+                <input
+                    v-else
+                    :type="field.type || 'text'"
+                    v-model="form[field.key]"
+                    :placeholder="field.placeholder"
+                />
+            </template>
         </form>
         <template #actions>
             <button type="button" @click="$emit('close')">취소</button>

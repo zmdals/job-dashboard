@@ -41,15 +41,26 @@ public class Career extends BaseCreatedEntity {
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    //null = 재직 중.
+    // null = 재직 중.
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    //담당 업무
+    // 담당 업무
     @Column(name = "description")
     private String description;
 
     // @Column(name = "achievement")
     // private String achievement;
+
+    // 경력사항 수정
+    public void update(String companyName, String position,
+            LocalDate startDate, LocalDate endDate,
+            String description) {
+        this.companyName = companyName;
+        this.position = position;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.description = description;
+    }
 
 }

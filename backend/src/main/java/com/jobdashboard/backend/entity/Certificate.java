@@ -47,4 +47,12 @@ public class Certificate extends BaseCreatedEntity {
     @Column(name = "language_score")
     private Integer languageScore;
 
+    // 자격증 수정
+    public void update(String certName, String issuer, LocalDate acquiredDate, Integer languageScore) {
+        this.certName = certName;
+        this.issuer = issuer;
+        this.acquiredDate = acquiredDate;
+        this.languageScore = languageScore;
+    }
+
 }

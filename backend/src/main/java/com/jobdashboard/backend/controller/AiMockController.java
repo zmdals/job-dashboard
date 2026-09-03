@@ -2,9 +2,11 @@ package com.jobdashboard.backend.controller;
 
 import com.jobdashboard.backend.dto.ai.*;
 import com.jobdashboard.backend.dto.common.ApiResponse;
+import com.jobdashboard.backend.dto.company.CompanyEvidenceRes;
 import com.jobdashboard.backend.dto.matchanalysis.MatchAnalysisReq;
 import com.jobdashboard.backend.dto.matchanalysis.MatchAnalysisRes;
 import com.jobdashboard.backend.service.AiMockService;
+import com.jobdashboard.backend.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.List;
 public class AiMockController {
 
     private final AiMockService aiMockService;
+    private final CompanyService companyService;
 
     // 1. 적합도 (비저장, 모달용)
     @Operation(summary = "AI 적합도 분석", description = "유저 스펙 vs 공고 요건 비교 — 비저장, 상세 모달용")
@@ -67,5 +70,12 @@ public class AiMockController {
             @PathVariable Long applicationId) {
         Long userId = 1L;
         return ApiResponse.ok(aiMockService.getInterviewQuestions(applicationId, userId));
+    }
+
+    // 7. 맞춤 기업 리포트 (AI 관련도 분석)
+    @Operation(summary = "맞춤 기업 리포트", description = "유저 프로필 기반 기업 자료 관련도 분석")
+    @GetMapping("/api/companies/{companyId}/ai/report")
+    public ApiResponse<List<CompanyEvidenceRes>> getCompanyReport(@PathVariable Long companyId) {
+        return ApiResponse.ok(companyService.getEvidenceReport(companyId));
     }
 }

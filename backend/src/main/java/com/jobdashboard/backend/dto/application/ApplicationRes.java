@@ -31,6 +31,8 @@ public class ApplicationRes {
                 .jobTitle(application.getJobPosting().getTitle())
                 .status(application.getApplicationStatus())
                 .memo(application.getMemo())
+                .hasAnalysis(false)
+                .hasCoverLetter(false)
                 .createdAt(application.getCreatedAt())
                 .updatedAt(application.getUpdatedAt())
                 .build();

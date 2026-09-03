@@ -373,6 +373,13 @@ export const api = {
   // AI Mock API
   // =========================
 
+  // 공고 적합도 분석 (비저장, 상세 모달용)
+  getPostingRelevance(postingId) {
+    return request(`/postings/${postingId}/ai/relevance`, {
+      method: "POST",
+    });
+  },
+
   // 지원서 매칭 분석 요청
   requestApplicationAnalysis(applicationId) {
     return request(`/applications/${applicationId}/ai/analysis`, {

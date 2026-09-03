@@ -29,6 +29,7 @@ const router = createRouter({
       path: "/docs",
       component: SwaggerDocs,
     },
+
   ],
 });
 

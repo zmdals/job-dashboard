@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/companies")
 @RequiredArgsConstructor
-@Tag(name = "회사", description = "회사 정보 및 맞춤 기업 리포트 API")
+@Tag(name = "회사", description = "회사 정보 API")
 public class CompanyController {
 
     private final CompanyService companyService;
@@ -26,11 +26,5 @@ public class CompanyController {
     @GetMapping("/{companyId}")
     public ApiResponse<CompanyRes> getCompany(@PathVariable Long companyId) {
         return ApiResponse.ok(companyService.getCompany(companyId));
-    }
-
-    @Operation(summary = "맞춤 기업 리포트", description = "AI 관련도 기반 기업 자료 목록을 조회합니다")
-    @GetMapping("/{companyId}/evidences")
-    public ApiResponse<List<CompanyEvidenceRes>> getEvidenceReport(@PathVariable Long companyId) {
-        return ApiResponse.ok(companyService.getEvidenceReport(companyId));
     }
 }

@@ -1,23 +1,16 @@
 <script setup>
-import {ref} from 'vue'
-    defineProps({title:String})
-
-    const isEditing = ref(false)
-    function toggleEdit() {
-        isEditing.value = ! isEditing.value
-    }
+defineProps({ title: String })
+defineEmits(['add'])
 </script>
 
 <template>
     <div class="info-card">
         <div class="card-header">
             <span class="title">{{ title }}</span>
-            <span class="edit-link" @click="toggleEdit">
-                {{ isEditing ? '완료' : '수정' }}
-            </span>
+            <button type="button" class="add-link" @click="$emit('add')">+ 추가</button>
         </div>
         <div class="card-body">
-            <slot :editing="isEditing" />
+            <slot />
         </div>
     </div>
 </template>
@@ -45,10 +38,19 @@ import {ref} from 'vue'
     color: #1a1d1f;
 }
 
-.card-header .edit-link {
-    font-size: 13px;
-    color: #1f6b4a;
+.add-link {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    color: #666;
+    background: #fff;
+    font-size: 11px;
     cursor: pointer;
+}
+
+.add-link:hover {
+    border-color: #e31b23;
+    color: #e31b23;
 }
 
 .card-body {

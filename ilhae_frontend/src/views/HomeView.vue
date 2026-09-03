@@ -36,14 +36,14 @@ function selectFilter(label) {
 }
 
 const filterStatusMap = {
-    '서류합격': ['코딩테스트 (필기시험)'],
+    '진행중': ['서류준비','지원완료','코딩테스트 (필기시험)'],
     '면접 예정': ['1차면접', '2차면접', '최종면접'],
     '최종합격': ['최종합격'],
 }
 
 const stats = computed(() => [
     { label: '전체 지원', value: applications.value.length },
-    { label: '서류합격', value: applications.value.filter(app => filterStatusMap['서류합격'].includes(app.status)).length },
+    { label: '진행중', value: applications.value.filter(app => filterStatusMap['진행중'].includes(app.status)).length },
     { label: '면접 예정', value: applications.value.filter(app => filterStatusMap['면접 예정'].includes(app.status)).length },
     { label: '최종합격', value: applications.value.filter(app => filterStatusMap['최종합격'].includes(app.status)).length },
 ])

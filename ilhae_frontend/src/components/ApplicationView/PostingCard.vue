@@ -6,6 +6,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  score: {
+    type: [Number, String],
+    default: null,
+  },
 
   starred: {
     type: Boolean,
@@ -27,7 +31,6 @@ const emits = defineEmits([
 
 const companyName = computed(() => props.post.companyName || props.post.company?.name || '회사명 미정')
 const role = computed(() => [props.post.title, props.post.jobType].filter(Boolean).join(' · '))
-const score = computed(() => props.post.relevanceScore ?? props.post.matchScore ?? props.post.relevance?.score ?? null)
 const deadline = computed(() => {
   if (!props.post.deadline) return { date: '상시채용', dDay: '' }
 

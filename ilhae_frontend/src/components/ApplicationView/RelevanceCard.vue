@@ -1,6 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
+import { computed, onMounted, ref } from 'vue'
 import ModalBox from '@/components/LegoBox/ModalBox.vue'
 import { usePostingsStore } from '@/stores/postingsStore'
 
@@ -11,14 +10,19 @@ const props = defineProps({
 defineEmits(['emitCloseCard'])
 
 const postingsStore = usePostingsStore()
-const { relevance, loading } = storeToRefs(postingsStore)
+const relevance = computed(() => postingsStore.getRelevance(props.id))
+const loading = ref(false)
 const loadError = ref(false)
 
 onMounted(async () => {
+  loading.value = true
+
   try {
-    await postingsStore.fetchRelevance(props.id)
+    await postingsStore.ensureRelevance(props.id)
   } catch {
     loadError.value = true
+  } finally {
+    loading.value = false
   }
 })
 </script>

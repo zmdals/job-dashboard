@@ -45,6 +45,18 @@ watch(filteredPostings, (items) => {
   currentPage.value = Math.min(currentPage.value, lastPage)
 })
 
+watch(
+  () => visiblePostings.value.map((posting) => posting.id),
+  async (postingIds) => {
+    await Promise.allSettled(
+      postingIds.map((postingId) =>
+        postingsStore.ensurePostingScore(postingId),
+      ),
+    )
+  },
+  { immediate: true },
+)
+
 onMounted(() => Promise.allSettled([
   postingsStore.ensurePostings(),
   meStore.ensureApplications(),
@@ -97,6 +109,7 @@ async function applySelected() {
             v-for="posting in visiblePostings"
             :key="posting.id"
             :post="posting"
+            :score="postingsStore.getPostingScore(posting.id)"
             :starred="meStore.isStarred(posting.id)"
             :applied="meStore.isApplied(posting.id)"
             @emit-request-detail="selectedPosting = posting"

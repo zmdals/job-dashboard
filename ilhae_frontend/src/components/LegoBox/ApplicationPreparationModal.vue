@@ -1,6 +1,7 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import ModalBox from '@/components/LegoBox/ModalBox.vue'
+import { api } from '@/api/client'
 
 const props = defineProps({
   application: {
@@ -22,23 +23,84 @@ const subtitle = computed(() =>
   [props.application.companyName, props.application.jobTitle].filter(Boolean).join(' · '),
 )
 
-const coverLetterSections = [
-  {
-    title: '지원 동기',
-    content:
-      '사용자의 문제를 발견하고 기술로 해결하는 과정에 관심을 가져왔습니다. 지원 기업의 서비스 방향과 제가 쌓아온 프로젝트 경험이 맞닿아 있다고 생각해 지원했습니다.',
+const coverLetter = ref(null)
+const feedback = ref(null)
+const form = ref({ title: '', content: '' })
+const loading = ref(false)
+const saving = ref(false)
+const analyzing = ref(false)
+const loadError = ref('')
+const formError = ref('')
+
+async function loadCoverLetter() {
+  if (isInterviewMode.value) return
+
+  loading.value = true
+  loadError.value = ''
+  formError.value = ''
+  feedback.value = null
+
+  try {
+    coverLetter.value = await api.getCoverLetter(props.application.id)
+  } catch (error) {
+    if (error.status === 404) {
+      coverLetter.value = null
+      return
+    }
+
+    loadError.value = error.message || '자기소개서를 불러오지 못했습니다.'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function createCoverLetter() {
+  formError.value = ''
+
+  if (!form.value.content.trim()) {
+    formError.value = '자기소개서 내용을 입력해 주세요.'
+    return
+  }
+
+  saving.value = true
+
+  try {
+    coverLetter.value = await api.createCoverLetter(props.application.id, {
+      title: form.value.title.trim() || null,
+      content: form.value.content.trim(),
+    })
+    feedback.value = null
+  } catch (error) {
+    formError.value = error.message || '자기소개서 생성에 실패했습니다.'
+  } finally {
+    saving.value = false
+  }
+}
+
+async function analyzeCoverLetter() {
+  if (!coverLetter.value?.id) return
+
+  analyzing.value = true
+  formError.value = ''
+
+  try {
+    feedback.value = await api.requestCoverLetterFeedback(coverLetter.value.id)
+  } catch (error) {
+    formError.value = error.message || 'AI 피드백을 불러오지 못했습니다.'
+  } finally {
+    analyzing.value = false
+  }
+}
+
+watch(
+  () => [props.application.id, props.mode],
+  () => {
+    coverLetter.value = null
+    form.value = { title: '', content: '' }
+    void loadCoverLetter()
   },
-  {
-    title: '직무 역량과 경험',
-    content:
-      '팀 프로젝트에서 요구사항을 정리하고 우선순위를 조율했으며, 데이터를 바탕으로 개선점을 찾고 결과를 공유한 경험이 있습니다. 협업 과정에서 맡은 일을 끝까지 책임지는 태도를 중요하게 생각합니다.',
-  },
-  {
-    title: '입사 후 포부',
-    content:
-      '빠르게 업무와 제품을 이해하고 동료들과 적극적으로 소통하겠습니다. 작은 개선을 꾸준히 쌓아 사용자와 조직 모두에게 도움이 되는 구성원으로 성장하겠습니다.',
-  },
-]
+  { immediate: true },
+)
 
 const interviewQuestions = [
   '이 직무와 기업에 지원한 가장 중요한 이유는 무엇인가요?',
@@ -53,22 +115,19 @@ const interviewQuestions = [
   <ModalBox
     :title="title"
     :subtitle="subtitle"
-    :wide="isInterviewMode"
+    :wide="isInterviewMode || Boolean(feedback)"
     @close="$emit('close')"
   >
-    <div class="preparation-layout" :class="{ sideBySide: isInterviewMode }">
-      <section class="document-panel">
-        <header class="panel-head">
-          <span>자기소개서</span>
-          <small>임시 작성본</small>
-        </header>
-        <div v-for="section in coverLetterSections" :key="section.title" class="document-section">
-          <h4>{{ section.title }}</h4>
-          <p>{{ section.content }}</p>
-        </div>
-      </section>
-
-      <section v-if="isInterviewMode" class="document-panel question-panel">
+    <template v-if="isInterviewMode">
+      <div class="preparation-layout sideBySide">
+        <section class="document-panel">
+          <header class="panel-head">
+            <span>면접 준비 안내</span>
+            <small>Mock 데이터</small>
+          </header>
+          <p>지원 직무와 본인의 경험을 연결해서 답변을 준비해 보세요.</p>
+        </section>
+        <section class="document-panel question-panel">
         <header class="panel-head">
           <span>예상 면접 질문</span>
           <small>총 {{ interviewQuestions.length }}문항</small>
@@ -76,11 +135,93 @@ const interviewQuestions = [
         <ol>
           <li v-for="question in interviewQuestions" :key="question">{{ question }}</li>
         </ol>
-      </section>
-    </div>
+        </section>
+      </div>
+    </template>
+
+    <template v-else>
+      <p v-if="loading" class="state">자기소개서를 불러오는 중입니다.</p>
+
+      <div v-else-if="loadError" class="state error">
+        <p>{{ loadError }}</p>
+        <button type="button" @click="loadCoverLetter">다시 시도</button>
+      </div>
+
+      <div v-else class="preparation-layout" :class="{ sideBySide: feedback }">
+        <section class="document-panel">
+          <header class="panel-head">
+            <span>{{ coverLetter ? '저장된 자기소개서' : '새 자기소개서' }}</span>
+            <small v-if="coverLetter">v{{ coverLetter.version }}</small>
+            <small v-else>작성 후 저장해 주세요</small>
+          </header>
+
+          <div v-if="coverLetter" class="cover-letter-view">
+            <h4>{{ coverLetter.title || '제목 없음' }}</h4>
+            <p>{{ coverLetter.content }}</p>
+          </div>
+
+          <form v-else class="cover-letter-form" @submit.prevent="createCoverLetter">
+            <label for="cover-letter-title">제목</label>
+            <input
+              id="cover-letter-title"
+              v-model="form.title"
+              type="text"
+              placeholder="자기소개서 제목 (선택)"
+            />
+            <label for="cover-letter-content">내용</label>
+            <textarea
+              id="cover-letter-content"
+              v-model="form.content"
+              placeholder="자기소개서 내용을 입력해 주세요"
+              required
+            ></textarea>
+          </form>
+        </section>
+
+        <section v-if="feedback" class="document-panel feedback-panel">
+          <header class="panel-head">
+            <span>AI 자기소개서 피드백</span>
+            <strong>{{ feedback.score }}점</strong>
+          </header>
+          <p class="feedback-summary">{{ feedback.summary }}</p>
+          <div class="feedback-group">
+            <h4>강점</h4>
+            <ul>
+              <li v-for="item in feedback.strengths" :key="item">{{ item }}</li>
+            </ul>
+          </div>
+          <div class="feedback-group improvement">
+            <h4>개선할 점</h4>
+            <ul>
+              <li v-for="item in feedback.improvements" :key="item">{{ item }}</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
+    </template>
 
     <template #actions>
       <button type="button" @click="$emit('close')">닫기</button>
+      <button
+        v-if="!isInterviewMode && !loading && !loadError && !coverLetter"
+        class="primary"
+        type="button"
+        :disabled="saving"
+        @click="createCoverLetter"
+      >
+        {{ saving ? '생성 중...' : '자기소개서 생성' }}
+      </button>
+      <button
+        v-if="!isInterviewMode && coverLetter"
+        class="primary"
+        type="button"
+        :disabled="analyzing"
+        @click="analyzeCoverLetter"
+      >
+        {{ analyzing ? '분석 중...' : feedback ? 'AI 다시 분석' : 'AI 분석' }}
+      </button>
     </template>
   </ModalBox>
 </template>
@@ -125,6 +266,98 @@ const interviewQuestions = [
 
 .document-section + .document-section {
   margin-top: 18px;
+}
+
+.cover-letter-view p {
+  white-space: pre-wrap;
+}
+
+.cover-letter-form {
+  display: grid;
+  gap: 8px;
+}
+
+.cover-letter-form label {
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cover-letter-form input,
+.cover-letter-form textarea {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #e7e7e7;
+  border-radius: 5px;
+  outline: 0;
+  font: inherit;
+  font-size: 12px;
+}
+
+.cover-letter-form textarea {
+  min-height: 220px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.cover-letter-form input:focus,
+.cover-letter-form textarea:focus {
+  border-color: #e31b23;
+  box-shadow: 0 0 0 3px #fff0f0;
+}
+
+.panel-head strong {
+  color: #e31b23;
+  font-size: 18px;
+}
+
+.feedback-summary {
+  padding: 13px;
+  border-radius: 6px;
+  background: #fff5f5;
+}
+
+.feedback-group {
+  margin-top: 18px;
+}
+
+.feedback-group ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.feedback-group li::marker {
+  color: #1f6b4a;
+}
+
+.feedback-group.improvement li::marker {
+  color: #e31b23;
+}
+
+.state {
+  margin: 0;
+  padding: 35px 0;
+  text-align: center;
+}
+
+.state.error {
+  color: #e31b23;
+}
+
+.state.error button {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.form-error {
+  margin: 12px 0 0;
+  color: #e31b23;
 }
 
 h4 {

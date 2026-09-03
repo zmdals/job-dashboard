@@ -11,8 +11,8 @@ const meStore = useMeStore()
 const userName = computed(() => meStore.profile?.name || '김청년')
 
 onMounted(() => {
-  if (authStore.isAuthenticated && !meStore.profile) {
-    meStore.fetchMe().catch(() => {})
+  if (authStore.isAuthenticated) {
+    meStore.ensureMe().catch(() => {})
   }
 })
 
@@ -27,6 +27,7 @@ function gotoProfile() {
 }
 function logout() {
   authStore.logout()
+  meStore.reset()
   router.push('/')
 }
 </script>

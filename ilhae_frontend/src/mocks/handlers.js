@@ -24,10 +24,39 @@ function findPosting(db, postingId) {
   return db.postings.find((posting) => posting.id === postingId)
 }
 
-function applicationView(db, application) {
+function findCompany(db, companyId) {
+  const company = (db.companies ?? []).find(
+    (item) => item.id === companyId,
+  )
+
+  if (company) return company
+
+  const legacyPosting = db.postings.find(
+    (posting) =>
+      posting.companyId === companyId ||
+      posting.company?.id === companyId,
+  )
+
+  if (!legacyPosting) return null
+
   return {
-    ...application,
-    posting: findPosting(db, application.postingId),
+    id: companyId,
+    name: legacyPosting.companyName ?? legacyPosting.company?.name,
+  }
+}
+
+function applicationView(db, application) {
+  const posting = findPosting(db, application.postingId)
+
+  return {
+    id: application.id,
+    jobPostingId: posting?.id,
+    companyName: posting?.companyName,
+    jobTitle: posting?.title,
+    status: application.status,
+    memo: application.memo ?? null,
+    createdAt: application.appliedAt,
+    updatedAt: application.updatedAt,
   }
 }
 
@@ -43,17 +72,18 @@ function currentUser(request, db) {
 
 function relevanceFor(user, posting) {
   const userSkills = new Set(user.skills.map((skill) => skill.toLowerCase()))
+  const postingSkills = posting.techStack ?? []
 
-  const matchedSkills = posting.techStack.filter((skill) =>
+  const matchedSkills = postingSkills.filter((skill) =>
     userSkills.has(skill.toLowerCase()),
   )
 
-  const missingSkills = posting.techStack.filter(
+  const missingSkills = postingSkills.filter(
     (skill) => !userSkills.has(skill.toLowerCase()),
   )
 
-  const score = posting.techStack.length
-    ? Math.round((matchedSkills.length / posting.techStack.length) * 100)
+  const score = postingSkills.length
+    ? Math.round((matchedSkills.length / postingSkills.length) * 100)
     : 0
 
   return {
@@ -164,6 +194,109 @@ export const handlers = [
     }
 
     return json(posting)
+  }),
+
+  http.post(`${API}/postings`, async ({ request }) => {
+    await latency()
+
+    const body = await request.json()
+
+    if (!body?.companyId || !body?.title) {
+      return error(
+        400,
+        'INVALID_REQUEST',
+        'companyId와 title은 필수입니다.',
+      )
+    }
+
+    const db = getDb()
+    const company = findCompany(db, body.companyId)
+
+    if (!company) {
+      return error(404, 'COMPANY_NOT_FOUND', '회사를 찾을 수 없습니다.')
+    }
+
+    const posting = {
+      id: nextId('posting'),
+      companyId: company.id,
+      companyName: company.name,
+      title: body.title,
+      url: body.url ?? null,
+      jobType: body.jobType ?? null,
+      location: body.location ?? null,
+      annualIncome: body.annualIncome ?? null,
+      deadline: body.deadline ?? null,
+      description: body.description ?? null,
+    }
+
+    db.postings.push(posting)
+    saveDb(db)
+    return json(posting)
+  }),
+
+  http.put(`${API}/postings/:postingId`, async ({ request, params }) => {
+    await latency()
+
+    const db = getDb()
+    const index = db.postings.findIndex(
+      (posting) => posting.id === params.postingId,
+    )
+
+    if (index < 0) {
+      return error(
+        404,
+        'POSTING_NOT_FOUND',
+        '공고를 찾을 수 없습니다.',
+      )
+    }
+
+    const body = await request.json()
+
+    if (!body?.companyId || !body?.title) {
+      return error(
+        400,
+        'INVALID_REQUEST',
+        'companyId와 title은 필수입니다.',
+      )
+    }
+
+    const posting = {
+      id: db.postings[index].id,
+      companyId: db.postings[index].companyId,
+      companyName: db.postings[index].companyName,
+      title: body.title,
+      url: body.url ?? null,
+      jobType: body.jobType ?? null,
+      location: body.location ?? null,
+      annualIncome: body.annualIncome ?? null,
+      deadline: body.deadline ?? null,
+      description: body.description ?? null,
+    }
+
+    db.postings[index] = posting
+    saveDb(db)
+    return json(posting)
+  }),
+
+  http.delete(`${API}/postings/:postingId`, async ({ params }) => {
+    await latency()
+
+    const db = getDb()
+    const before = db.postings.length
+    db.postings = db.postings.filter(
+      (posting) => posting.id !== params.postingId,
+    )
+
+    if (db.postings.length === before) {
+      return error(
+        404,
+        'POSTING_NOT_FOUND',
+        '공고를 찾을 수 없습니다.',
+      )
+    }
+
+    saveDb(db)
+    return json(null)
   }),
 
   http.get(

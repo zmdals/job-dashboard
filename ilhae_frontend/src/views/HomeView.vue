@@ -1,17 +1,11 @@
 <script setup>
 import ApplicationTable from '@/components/ApplicationTable.vue';
 import StatCard from '@/components/StatCard.vue';
-import {ref} from 'vue';
-const stats = ref([
-    { label: '지원완료', value: 12 },
-    { label: '서류합격', value: 4 },
-    { label: '면접 예정', value: 2 },
-    { label: '최종합격', value: 1 },
-])
+import {ref, computed} from 'vue';
 const applications = ref([
     {
   id: 1,
-  status: '서류합격',
+  status: '1차면접',
   company: '네이버',
   role: '프론트엔드',
   announceDate: '2026-09-01',
@@ -35,17 +29,49 @@ const applications = ref([
 },
 
 ])
+
+const selectedFilter = ref('전체 지원')
+function selectFilter(label) {
+    selectedFilter.value = label
+}
+
+const filterStatusMap = {
+    '서류합격': ['코딩테스트 (필기시험)'],
+    '면접 예정': ['1차면접', '2차면접', '최종면접'],
+    '최종합격': ['최종합격'],
+}
+
+const stats = computed(() => [
+    { label: '전체 지원', value: applications.value.length },
+    { label: '서류합격', value: applications.value.filter(app => filterStatusMap['서류합격'].includes(app.status)).length },
+    { label: '면접 예정', value: applications.value.filter(app => filterStatusMap['면접 예정'].includes(app.status)).length },
+    { label: '최종합격', value: applications.value.filter(app => filterStatusMap['최종합격'].includes(app.status)).length },
+])
+
+const filteredApplications = computed(() => {
+    if (selectedFilter.value === '전체 지원') {
+        return applications.value
+    }
+    const matchStatuses = filterStatusMap[selectedFilter.value] || []
+    return applications.value.filter(app => matchStatuses.includes(app.status))
+})
 </script>
 
 <template>
     <div class="applicationStatus">
         <h3>지원현황</h3>
-        <p>총 {{ stats.find(s=> s.label==='지원완료').value }}건</p>
+        <p>나의 취업 여정을 한눈에 확인해 보세요.</p>
     </div>
     <div class="status">
-        <StatCard v-for="s in stats" :key="s.label" v-bind="s"></StatCard>
+        <StatCard
+            v-for="s in stats"
+            :key="s.label"
+            v-bind="s"
+            :active="selectedFilter === s.label"
+            @click="selectFilter(s.label)"
+        ></StatCard>
     </div>
-    <ApplicationTable :applications="applications"/>
+    <ApplicationTable :applications="filteredApplications"/>
 </template>
 
 <style scoped>
@@ -53,26 +79,35 @@ const applications = ref([
     display: flex;
     align-items: baseline;
     gap: 10px;
-    padding: 32px 40px 20px;
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 56px 24px 20px;
 }
 
 .applicationStatus h3 {
     margin: 0;
-    font-size: 20px;
+    font-size: 30px;
     font-weight: 700;
-    color: #1a1d1f;
+    letter-spacing: -.07em;
+    color: #202124;
 }
 
 .applicationStatus p {
     margin: 0;
     font-size: 13px;
-    color: #9aa0a6;
+    color: #858585;
 }
 
 .status {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    padding: 0 40px 24px;
+    gap: 12px;
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+}
+
+.status :deep(.stat-card:first-child .value) {
+    color: #e31b23;
 }
 </style>

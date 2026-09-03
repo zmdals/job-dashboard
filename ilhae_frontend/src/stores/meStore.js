@@ -190,6 +190,27 @@ export const useMeStore = defineStore('me', () => {
     })
   }
 
+  function updateApplicationFlags(applicationId, flags) {
+    const index = applications.value.findIndex(
+      (application) => String(application.id) === String(applicationId),
+    )
+
+    if (index >= 0) {
+      applications.value[index] = {
+        ...applications.value[index],
+        ...flags,
+      }
+    }
+  }
+
+  function markApplicationAnalyzed(applicationId) {
+    updateApplicationFlags(applicationId, { hasAnalysis: true })
+  }
+
+  function markApplicationHasCoverLetter(applicationId) {
+    updateApplicationFlags(applicationId, { hasCoverLetter: true })
+  }
+
   async function fetchStarredPostings() {
     return run(async () => {
       starredPostings.value =
@@ -287,6 +308,8 @@ export const useMeStore = defineStore('me', () => {
     apply,
     updateApplicationStatus,
     deleteApplication,
+    markApplicationAnalyzed,
+    markApplicationHasCoverLetter,
     fetchStarredPostings,
     ensureStarredPostings,
     toggleStar,

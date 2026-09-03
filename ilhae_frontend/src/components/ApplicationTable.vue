@@ -5,6 +5,7 @@ import {
   APPLICATION_STATUS_OPTIONS,
   APPLICATION_STATUS_TRANSITIONS,
 } from '@/constants/applicationStatus'
+import ApplicationAnalysisModal from '@/components/LegoBox/ApplicationAnalysisModal.vue'
 import ApplicationPreparationModal from '@/components/LegoBox/ApplicationPreparationModal.vue'
 
 const props = defineProps({
@@ -14,10 +15,17 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['updateStatus', 'delete'])
+const emit = defineEmits([
+  'updateStatus',
+  'delete',
+  'analysisUpdated',
+  'coverLetterCreated',
+])
 
 const selectedApplication = ref(null)
 const preparationMode = ref('cover-letter')
+const selectedAnalysisApplication = ref(null)
+const analysisInitialAction = ref('view')
 
 function statusOptionsFor(currentStatus) {
   const availableStatuses = new Set([
@@ -48,6 +56,23 @@ function openPreparation(application, mode) {
 function closePreparation() {
   selectedApplication.value = null
 }
+
+function openAnalysis(application) {
+  selectedAnalysisApplication.value = application
+  analysisInitialAction.value = application.hasAnalysis ? 'view' : 'create'
+}
+
+function closeAnalysis() {
+  selectedAnalysisApplication.value = null
+}
+
+function handleAnalysisUpdated(applicationId) {
+  emit('analysisUpdated', applicationId)
+}
+
+function handleCoverLetterCreated(applicationId) {
+  emit('coverLetterCreated', applicationId)
+}
 </script>
 
 <template>
@@ -72,6 +97,9 @@ function closePreparation() {
           @click="openPreparation(app, 'interview')"
         >
           예상 면접 질문
+        </button>
+        <button class="analysis-button" type="button" @click="openAnalysis(app)">
+          {{ app.hasAnalysis ? '분석 결과 보기' : 'AI 분석하기' }}
         </button>
       </div>
       <select
@@ -98,6 +126,15 @@ function closePreparation() {
     :application="selectedApplication"
     :mode="preparationMode"
     @close="closePreparation"
+    @cover-letter-created="handleCoverLetterCreated"
+  />
+
+  <ApplicationAnalysisModal
+    v-if="selectedAnalysisApplication"
+    :application="selectedAnalysisApplication"
+    :initial-action="analysisInitialAction"
+    @close="closeAnalysis"
+    @analyzed="handleAnalysisUpdated"
   />
 </template>
 
@@ -177,8 +214,13 @@ function closePreparation() {
 
 .preparation-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
+}
+
+.preparation-actions .analysis-button {
+  border-color: #e31b23;
+  color: #e31b23;
 }
 
 .preparation-actions button {

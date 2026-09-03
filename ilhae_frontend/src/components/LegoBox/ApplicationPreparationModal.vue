@@ -15,7 +15,7 @@ const props = defineProps({
   },
 })
 
-defineEmits(['close'])
+const emit = defineEmits(['close', 'coverLetterCreated'])
 
 const questionsLoading = ref(false)
 const questionsGenerating = ref(false)
@@ -129,6 +129,7 @@ async function createCoverLetter() {
       content: form.value.content.trim(),
     })
     feedback.value = null
+    emit('coverLetterCreated', props.application.id)
   } catch (error) {
     formError.value = error.message || '자기소개서 생성에 실패했습니다.'
   } finally {

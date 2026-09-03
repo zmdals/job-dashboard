@@ -164,9 +164,9 @@ export const api = {
     return request(`/companies/${companyId}`);
   },
 
-  // 맞춤 기업 리포트 자료 조회
-  getCompanyEvidences(companyId) {
-    return request(`/companies/${companyId}/evidences`);
+  // AI 맞춤 기업 리포트 조회
+  getCompanyReport(companyId) {
+    return request(`/companies/${companyId}/ai/report`);
   },
 
   // =========================
@@ -402,9 +402,10 @@ export const api = {
   },
 
   // 지원서 매칭 분석 요청
-  requestApplicationAnalysis(applicationId) {
+  requestApplicationAnalysis(applicationId, includeCoverLetter = false) {
     return request(`/applications/${applicationId}/ai/analysis`, {
       method: "POST",
+      body: JSON.stringify({ includeCoverLetter }),
     });
   },
 

@@ -63,7 +63,7 @@ export const useCompaniesStore = defineStore('companies', () => {
 
   async function fetchCompanyEvidences(companyId) {
     return run(async () => {
-      const evidences = await api.getCompanyEvidences(companyId)
+      const evidences = await api.getCompanyReport(companyId)
       evidencesByCompanyId.value[String(companyId)] = evidences
       return evidences
     })

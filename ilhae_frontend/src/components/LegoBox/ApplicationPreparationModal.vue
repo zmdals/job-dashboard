@@ -171,34 +171,27 @@ watch(
     @close="$emit('close')"
   >
     <template v-if="isInterviewMode">
-      <div class="preparation-layout sideBySide">
-        <section class="document-panel">
-          <header class="panel-head">
-            <span>면접 준비 안내</span>
-            <small>Mock 데이터</small>
-          </header>
-          <p>지원 직무와 본인의 경험을 연결해서 답변을 준비해 보세요.</p>
-        </section>
+      <div class="preparation-layout">
         <section class="document-panel question-panel">
-        <header class="panel-head">
-          <span>예상 면접 질문</span>
-          <small v-if="questionsExist">총 {{ interviewQuestions.length }}문항</small>
-        </header>
+          <header class="panel-head">
+            <span>예상 면접 질문</span>
+            <small v-if="questionsExist">총 {{ interviewQuestions.length }}문항</small>
+          </header>
 
-        <p v-if="questionsLoading" class="state">불러오는 중입니다...</p>
-        <p v-else-if="questionsErrorMessage" class="state error">{{ questionsErrorMessage }}</p>
-        <div v-else-if="!questionsExist" class="generate-panel">
-          <p class="state">아직 생성된 면접 질문이 없어요.</p>
-          <button type="button" :disabled="questionsGenerating" @click="generateInterviewQuestions">
-            {{ questionsGenerating ? '생성 중...' : '면접 질문 생성' }}
-          </button>
-        </div>
-        <ol v-else>
-          <li v-for="question in interviewQuestions" :key="question.id ?? question.question">
-            {{ question.question }}
-            <small v-if="question.sampleAnswer">{{ question.sampleAnswer }}</small>
-          </li>
-        </ol>
+          <p v-if="questionsLoading" class="state">불러오는 중입니다...</p>
+          <p v-else-if="questionsErrorMessage" class="state error">{{ questionsErrorMessage }}</p>
+          <div v-else-if="!questionsExist" class="generate-panel">
+            <p class="state">아직 생성된 면접 질문이 없어요.</p>
+            <button type="button" :disabled="questionsGenerating" @click="generateInterviewQuestions">
+              {{ questionsGenerating ? '생성 중...' : '면접 질문 생성' }}
+            </button>
+          </div>
+          <ol v-else>
+            <li v-for="question in interviewQuestions" :key="question.id ?? question.question">
+              {{ question.question }}
+              <small v-if="question.sampleAnswer">{{ question.sampleAnswer }}</small>
+            </li>
+          </ol>
         </section>
       </div>
     </template>

@@ -479,8 +479,445 @@ export const handlers = [
     return json(publicUser(user))
   }),
 
+  // =========================
+  // My Specs — Education
+  // =========================
+
+  http.get(`${API}/me/educations`, async ({ request }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    return json(user.educations ?? [])
+  }),
+
+  http.get(
+    `${API}/me/educations/:educationId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const education = (user.educations ?? []).find(
+        (item) => item.id === params.educationId,
+      )
+
+      if (!education) {
+        return error(404, 'EDUCATION_NOT_FOUND', '학력 정보를 찾을 수 없습니다.')
+      }
+
+      return json(education)
+    },
+  ),
+
+  http.post(`${API}/me/educations`, async ({ request }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    const body = await request.json()
+
+    if (!body?.schoolName) {
+      return error(400, 'INVALID_REQUEST', '학교명은 필수입니다.')
+    }
+
+    const education = {
+      id: nextId('education'),
+      schoolName: body.schoolName,
+      degree: body.degree ?? null,
+      major: body.major ?? null,
+      startDate: body.startDate ?? null,
+      endDate: body.endDate ?? null,
+      educationStatus: body.educationStatus ?? null,
+    }
+
+    user.educations = user.educations ?? []
+    user.educations.push(education)
+    saveDb(db)
+
+    return json(education, 201)
+  }),
+
+  http.put(
+    `${API}/me/educations/:educationId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const index = (user.educations ?? []).findIndex(
+        (item) => item.id === params.educationId,
+      )
+
+      if (index < 0) {
+        return error(404, 'EDUCATION_NOT_FOUND', '학력 정보를 찾을 수 없습니다.')
+      }
+
+      const body = await request.json()
+
+      user.educations[index] = {
+        ...user.educations[index],
+        ...body,
+        id: params.educationId,
+      }
+      saveDb(db)
+
+      return json(user.educations[index])
+    },
+  ),
+
+  http.delete(
+    `${API}/me/educations/:educationId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const before = (user.educations ?? []).length
+
+      user.educations = (user.educations ?? []).filter(
+        (item) => item.id !== params.educationId,
+      )
+
+      if (user.educations.length === before) {
+        return error(404, 'EDUCATION_NOT_FOUND', '학력 정보를 찾을 수 없습니다.')
+      }
+
+      saveDb(db)
+
+      return new HttpResponse(null, { status: 204 })
+    },
+  ),
+
+  // =========================
+  // My Specs — Career
+  // =========================
+
+  http.get(`${API}/me/careers`, async ({ request }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    return json(user.careers ?? [])
+  }),
+
+  http.get(`${API}/me/careers/:careerId`, async ({ request, params }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    const career = (user.careers ?? []).find(
+      (item) => item.id === params.careerId,
+    )
+
+    if (!career) {
+      return error(404, 'CAREER_NOT_FOUND', '경력 정보를 찾을 수 없습니다.')
+    }
+
+    return json(career)
+  }),
+
+  http.post(`${API}/me/careers`, async ({ request }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    const body = await request.json()
+
+    if (!body?.companyName) {
+      return error(400, 'INVALID_REQUEST', '회사명은 필수입니다.')
+    }
+
+    const career = {
+      id: nextId('career'),
+      companyName: body.companyName,
+      position: body.position ?? null,
+      startDate: body.startDate ?? null,
+      endDate: body.endDate ?? null,
+      description: body.description ?? null,
+    }
+
+    user.careers = user.careers ?? []
+    user.careers.push(career)
+    saveDb(db)
+
+    return json(career, 201)
+  }),
+
+  http.put(
+    `${API}/me/careers/:careerId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const index = (user.careers ?? []).findIndex(
+        (item) => item.id === params.careerId,
+      )
+
+      if (index < 0) {
+        return error(404, 'CAREER_NOT_FOUND', '경력 정보를 찾을 수 없습니다.')
+      }
+
+      const body = await request.json()
+
+      user.careers[index] = {
+        ...user.careers[index],
+        ...body,
+        id: params.careerId,
+      }
+      saveDb(db)
+
+      return json(user.careers[index])
+    },
+  ),
+
+  http.delete(
+    `${API}/me/careers/:careerId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const before = (user.careers ?? []).length
+
+      user.careers = (user.careers ?? []).filter(
+        (item) => item.id !== params.careerId,
+      )
+
+      if (user.careers.length === before) {
+        return error(404, 'CAREER_NOT_FOUND', '경력 정보를 찾을 수 없습니다.')
+      }
+
+      saveDb(db)
+
+      return new HttpResponse(null, { status: 204 })
+    },
+  ),
+
+  // =========================
+  // My Specs — Project
+  // =========================
+
+  http.get(`${API}/me/projects`, async ({ request }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    return json(user.projects ?? [])
+  }),
+
+  http.get(`${API}/me/projects/:projectId`, async ({ request, params }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    const project = (user.projects ?? []).find(
+      (item) => item.id === params.projectId,
+    )
+
+    if (!project) {
+      return error(404, 'PROJECT_NOT_FOUND', '프로젝트 정보를 찾을 수 없습니다.')
+    }
+
+    return json(project)
+  }),
+
+  http.post(`${API}/me/projects`, async ({ request }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    const body = await request.json()
+
+    if (!body?.projectName) {
+      return error(400, 'INVALID_REQUEST', '프로젝트명은 필수입니다.')
+    }
+
+    const project = {
+      id: nextId('project'),
+      projectName: body.projectName,
+      role: body.role ?? null,
+      techStack: body.techStack ?? null,
+      description: body.description ?? null,
+    }
+
+    user.projects = user.projects ?? []
+    user.projects.push(project)
+    saveDb(db)
+
+    return json(project, 201)
+  }),
+
+  http.put(
+    `${API}/me/projects/:projectId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const index = (user.projects ?? []).findIndex(
+        (item) => item.id === params.projectId,
+      )
+
+      if (index < 0) {
+        return error(404, 'PROJECT_NOT_FOUND', '프로젝트 정보를 찾을 수 없습니다.')
+      }
+
+      const body = await request.json()
+
+      user.projects[index] = {
+        ...user.projects[index],
+        ...body,
+        id: params.projectId,
+      }
+      saveDb(db)
+
+      return json(user.projects[index])
+    },
+  ),
+
+  http.delete(
+    `${API}/me/projects/:projectId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const before = (user.projects ?? []).length
+
+      user.projects = (user.projects ?? []).filter(
+        (item) => item.id !== params.projectId,
+      )
+
+      if (user.projects.length === before) {
+        return error(404, 'PROJECT_NOT_FOUND', '프로젝트 정보를 찾을 수 없습니다.')
+      }
+
+      saveDb(db)
+
+      return new HttpResponse(null, { status: 204 })
+    },
+  ),
+
+  // =========================
+  // My Specs — Certificate
+  // =========================
+
+  http.get(`${API}/me/certificates`, async ({ request }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    return json(user.certificates ?? [])
+  }),
+
+  http.get(
+    `${API}/me/certificates/:certificateId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const certificate = (user.certificates ?? []).find(
+        (item) => item.id === params.certificateId,
+      )
+
+      if (!certificate) {
+        return error(404, 'CERTIFICATE_NOT_FOUND', '자격증을 찾을 수 없습니다.')
+      }
+
+      return json(certificate)
+    },
+  ),
+
   http.post(
-    `${API}/users/me/certificates`,
+    `${API}/me/certificates`,
     async ({ request }) => {
       await latency()
 
@@ -493,7 +930,7 @@ export const handlers = [
 
       const body = await request.json()
 
-      if (!body?.name) {
+      if (!body?.certName) {
         return error(
           400,
           'INVALID_REQUEST',
@@ -503,13 +940,13 @@ export const handlers = [
 
       const certificate = {
         id: nextId('cert'),
-        name: body.name,
+        certName: body.certName,
         issuer: body.issuer ?? null,
-        issuedAt: body.issuedAt ?? null,
-        expiresAt: body.expiresAt ?? null,
-        credentialId: body.credentialId ?? null,
+        acquiredDate: body.acquiredDate ?? null,
+        languageScore: body.languageScore ?? null,
       }
 
+      user.certificates = user.certificates ?? []
       user.certificates.push(certificate)
       saveDb(db)
 
@@ -517,8 +954,41 @@ export const handlers = [
     },
   ),
 
+  http.put(
+    `${API}/me/certificates/:certificateId`,
+    async ({ request, params }) => {
+      await latency()
+
+      const db = getDb()
+      const user = currentUser(request, db)
+
+      if (!user) {
+        return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+      }
+
+      const index = (user.certificates ?? []).findIndex(
+        (item) => item.id === params.certificateId,
+      )
+
+      if (index < 0) {
+        return error(404, 'CERTIFICATE_NOT_FOUND', '자격증을 찾을 수 없습니다.')
+      }
+
+      const body = await request.json()
+
+      user.certificates[index] = {
+        ...user.certificates[index],
+        ...body,
+        id: params.certificateId,
+      }
+      saveDb(db)
+
+      return json(user.certificates[index])
+    },
+  ),
+
   http.delete(
-    `${API}/users/me/certificates/:certificateId`,
+    `${API}/me/certificates/:certificateId`,
     async ({ request, params }) => {
       await latency()
 
@@ -548,6 +1018,28 @@ export const handlers = [
       return new HttpResponse(null, { status: 204 })
     },
   ),
+
+  // =========================
+  // My Specs — combined
+  // =========================
+
+  http.get(`${API}/me/specs`, async ({ request }) => {
+    await latency()
+
+    const db = getDb()
+    const user = currentUser(request, db)
+
+    if (!user) {
+      return error(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    }
+
+    return json({
+      educations: user.educations ?? [],
+      careers: user.careers ?? [],
+      projects: user.projects ?? [],
+      certificates: user.certificates ?? [],
+    })
+  }),
 
   http.patch(
     `${API}/applications/:applicationId/status`,

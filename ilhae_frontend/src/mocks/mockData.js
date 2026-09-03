@@ -13,11 +13,40 @@ export const initialMockDb = {
       certificates: [
         {
           id: 'cert-001',
-          name: '정보처리기사',
+          certName: '정보처리기사',
           issuer: '한국산업인력공단',
-          issuedAt: '2025-06-15',
-          expiresAt: null,
-          credentialId: null,
+          acquiredDate: '2025-06-15',
+          languageScore: null,
+        },
+      ],
+      educations: [
+        {
+          id: 'education-001',
+          schoolName: '한국대학교',
+          degree: '학사',
+          major: '생명공학과',
+          startDate: '2019-03-01',
+          endDate: '2023-02-28',
+          educationStatus: 'GRADUATED',
+        },
+      ],
+      careers: [
+        {
+          id: 'career-001',
+          companyName: '바이오공정연구실',
+          position: '학부연구생',
+          startDate: '2022-01-01',
+          endDate: '2023-02-28',
+          description: '14개월 · 세포배양·정제 실험',
+        },
+      ],
+      projects: [
+        {
+          id: 'project-001',
+          projectName: '교내 캡스톤 경진대회',
+          role: '팀장',
+          techStack: '미생물 배양 자동화',
+          description: '장려상 수상',
         },
       ],
     },
@@ -30,6 +59,9 @@ export const initialMockDb = {
       role: 'ADMIN',
       skills: [],
       certificates: [],
+      educations: [],
+      careers: [],
+      projects: [],
     },
   ],
 

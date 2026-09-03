@@ -5,7 +5,6 @@ import { api } from '@/api/client'
 export const usePostingsStore = defineStore('postings', () => {
   const postings = ref([])
   const selectedPosting = ref(null)
-  const info = ref(null)
   const pagination = ref({
     totalElements: 0,
     totalPages: 0,
@@ -192,19 +191,9 @@ export const usePostingsStore = defineStore('postings', () => {
     })
   }
 
-  async function fetchInfo(postingId) {
-    info.value = null
-    return run(async () => {
-      info.value = await api.getPostingInfo(postingId)
-
-      return info.value
-    })
-  }
-
   return {
     postings,
     selectedPosting,
-    info,
     pagination,
     postingPages,
     loading,
@@ -218,6 +207,5 @@ export const usePostingsStore = defineStore('postings', () => {
     createPosting,
     updatePosting,
     deletePosting,
-    fetchInfo,
   }
 })

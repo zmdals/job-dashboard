@@ -37,8 +37,10 @@ public class JobPostingRes {
 
     private String description;
 
+    private Integer relevanceScore; // AI 적합도 (0~100) - mock 데이터
+
     // static from(Entity) 메서드로 엔티티 → DTO 변환
-    public static JobPostingRes from(JobPosting jobPosting){
+    public static JobPostingRes from(JobPosting jobPosting,Integer relevanceScore){
         return JobPostingRes.builder()
                 .id(jobPosting.getId())
                 .companyId(jobPosting.getCompany().getId())
@@ -50,6 +52,7 @@ public class JobPostingRes {
                 .annualIncome(jobPosting.getAnnualIncome())
                 .deadline(jobPosting.getDeadline())
                 .description(jobPosting.getDescription())
+                .relevanceScore(relevanceScore)
                 .build();
     }
 }

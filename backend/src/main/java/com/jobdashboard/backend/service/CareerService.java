@@ -23,37 +23,27 @@ public class CareerService {
     private final CareerRepository careerRepository;
     private final UserRepository userRepository;
 
-    // 전체 경력 조회
-    // findAll()로 엔티티 목록을 가져온 뒤 CareerRes로 변환한다.
-    public List<CareerRes> getAll() {
-        return careerRepository.findAll().stream()
+    // 현재 유저의 전체 경력 조회
+    public List<CareerRes> getAll(Long userId) {
+        return careerRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
                 .map(CareerRes::from)
                 .toList();
     }
 
-    // 단일 경력 조회
-    // ID로 조회하고, 데이터가 없으면 예외를 발생시킨다.
-    public CareerRes get(Long careerId) {
-        Career career = careerRepository.findById(careerId)
-                .orElseThrow(() -> new ResourceNotFoundException("경력사항을 찾을 수 없습니다."));
-        return CareerRes.from(career);
-    }
-
     // 경력 생성
-    // 요청 DTO를 Career 엔티티로 변환한 뒤 Repository를 통해 저장한다.
     @Transactional
     public CareerRes create(CareerReq req, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
         Career career = req.toEntity(user);
-
         return CareerRes.from(careerRepository.save(career));
     }
 
-    // 경력사항 수정
+    // 경력사항 수정 — userId 검증 포함
     @Transactional
-    public CareerRes update(CareerReq req, Long careerId) {
-        Career career = careerRepository.findById(careerId)
+    public CareerRes update(CareerReq req, Long careerId, Long userId) {
+        Career career = careerRepository.findByIdAndUserId(careerId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("경력사항을 찾을 수 없습니다."));
 
         career.update(
@@ -65,13 +55,12 @@ public class CareerService {
         return CareerRes.from(career);
     }
 
-    // 경력사항 삭제
+    // 경력사항 삭제 — userId 검증 포함
     @Transactional
-    public void remove(Long careerId) {
-        if (!careerRepository.existsById(careerId)) {
+    public void remove(Long careerId, Long userId) {
+        if (!careerRepository.existsByIdAndUserId(careerId, userId)) {
             throw new ResourceNotFoundException("경력사항을 찾을 수 없습니다.");
         }
         careerRepository.deleteById(careerId);
     }
-
 }

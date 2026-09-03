@@ -25,19 +25,19 @@ public class CertificateService {
 
     // 전체 자격증 조회
     // findAll()로 엔티티 목록을 가져온 뒤 CertificateRes로 변환한다.
-    public List<CertificateRes> getAll() {
-        return certificateRepository.findAll().stream()
+    public List<CertificateRes> getAll(Long userId) {
+        return certificateRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(CertificateRes::from)
                 .toList();
     }
-
+    /* 불필요
     // 단일 자격증 조회
     // ID로 조회하고, 데이터가 없으면 예외를 발생시킨다.
     public CertificateRes get(Long certificateId) {
         Certificate certificate = certificateRepository.findById(certificateId)
                 .orElseThrow(() -> new ResourceNotFoundException("자격증을 찾을 수 없습니다."));
         return CertificateRes.from(certificate);
-    }
+    } */
 
     // 자격증 생성
     // 사용자 정보를 연결한 뒤 요청 DTO를 Certificate 엔티티로 변환하고 저장한다.
@@ -52,8 +52,8 @@ public class CertificateService {
 
     // 자격증 삭제
     @Transactional
-    public void remove(Long certificateId) {
-        if (!certificateRepository.existsById(certificateId)) {
+    public void remove(Long certificateId, Long userId) {
+        if (!certificateRepository.existsByIdAndUserId(certificateId, userId)) {
             throw new ResourceNotFoundException("자격증을 찾을 수 없습니다.");
         }
         certificateRepository.deleteById(certificateId);
@@ -61,8 +61,8 @@ public class CertificateService {
 
     // 자격증 수정
     @Transactional
-    public CertificateRes update(CertificateReq req, Long certificateId) {
-        Certificate certificate = certificateRepository.findById(certificateId)
+    public CertificateRes update(CertificateReq req, Long certificateId, Long userId) {
+        Certificate certificate = certificateRepository.findByIdAndUserId(certificateId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("자격증을 찾을 수 없습니다."));
 
         certificate.update(

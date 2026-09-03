@@ -95,15 +95,16 @@ npx msw init public --save
 
 ```env
 VITE_USE_MSW=true
-VITE_API_BASE_URL=/api
 ```
 
 실제 백엔드로 전환:
 
 ```env
 VITE_USE_MSW=false
-VITE_API_BASE_URL=/api
 ```
+
+API 요청은 항상 `/api` 상대 경로를 사용하며, 개발 환경에서는 `vite.config.js`의
+프록시가 요청을 `http://localhost:8080`으로 전달합니다.
 
 ---
 

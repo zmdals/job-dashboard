@@ -3,8 +3,8 @@ import SwaggerDocs from "@/views/SwaggerDocs.vue";
 import LoginView from "@/views/LoginView.vue";
 import { useAuthStore } from "@/stores/authStore";
 
-// 서버 로그인 구현 전까지 비활성화. 준비되면 VITE_AUTH_GUARD_ENABLED=true로 복구한다.
-const AUTH_GUARD_ENABLED = import.meta.env.VITE_AUTH_GUARD_ENABLED === "true";
+// 서버 로그인 구현 전까지 인증 가드를 항상 비활성화한다.
+const AUTH_GUARD_ENABLED = false;
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

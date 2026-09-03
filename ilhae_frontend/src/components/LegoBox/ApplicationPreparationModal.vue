@@ -1,6 +1,7 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import ModalBox from '@/components/LegoBox/ModalBox.vue'
+import { api } from '@/api/client'
 
 const props = defineProps({
   application: {
@@ -15,6 +16,65 @@ const props = defineProps({
 })
 
 defineEmits(['close'])
+
+const questionsLoading = ref(false)
+const questionsGenerating = ref(false)
+const questionsExist = ref(false)
+const questionsErrorMessage = ref('')
+const interviewQuestions = ref([])
+
+async function fetchInterviewQuestions() {
+  questionsLoading.value = true
+  questionsErrorMessage.value = ''
+
+  console.log('[interview-questions] 조회 시작', { applicationId: props.application.id })
+
+  try {
+    const result = await api.getInterviewQuestions(props.application.id)
+    console.log('[interview-questions] 조회 성공', result)
+    interviewQuestions.value = result ?? []
+    questionsExist.value = true
+  } catch (e) {
+    if (e.status === 404) {
+      console.log('[interview-questions] 아직 생성된 질문 없음')
+      questionsExist.value = false
+    } else {
+      console.error('[interview-questions] 조회 실패', e)
+      questionsErrorMessage.value = e.message || '면접 질문을 불러오지 못했습니다.'
+    }
+  } finally {
+    questionsLoading.value = false
+  }
+}
+
+async function generateInterviewQuestions() {
+  questionsGenerating.value = true
+  questionsErrorMessage.value = ''
+
+  console.log('[interview-questions] 생성 시작', { applicationId: props.application.id })
+
+  try {
+    const result = await api.generateInterviewQuestions(props.application.id)
+    console.log('[interview-questions] 생성 성공', result)
+    interviewQuestions.value = result ?? []
+    questionsExist.value = true
+  } catch (e) {
+    console.error('[interview-questions] 생성 실패', e)
+    questionsErrorMessage.value = e.message || '면접 질문 생성에 실패했습니다.'
+  } finally {
+    questionsGenerating.value = false
+  }
+}
+
+watch(
+  () => [props.mode, props.application.id],
+  ([mode]) => {
+    if (mode === 'interview') {
+      fetchInterviewQuestions()
+    }
+  },
+  { immediate: true },
+)
 
 const isInterviewMode = computed(() => props.mode === 'interview')
 const title = computed(() => (isInterviewMode.value ? '예상 면접 질문' : '자기소개서'))
@@ -40,13 +100,6 @@ const coverLetterSections = [
   },
 ]
 
-const interviewQuestions = [
-  '이 직무와 기업에 지원한 가장 중요한 이유는 무엇인가요?',
-  '지원 직무와 가장 관련 있는 프로젝트에서 맡은 역할을 설명해 주세요.',
-  '의견이 다른 팀원과 협업하며 문제를 해결했던 경험이 있나요?',
-  '프로젝트 성과를 데이터나 구체적인 결과로 설명해 주세요.',
-  '입사 후 가장 먼저 배우거나 기여하고 싶은 부분은 무엇인가요?',
-]
 </script>
 
 <template>
@@ -71,10 +124,22 @@ const interviewQuestions = [
       <section v-if="isInterviewMode" class="document-panel question-panel">
         <header class="panel-head">
           <span>예상 면접 질문</span>
-          <small>총 {{ interviewQuestions.length }}문항</small>
+          <small v-if="questionsExist">총 {{ interviewQuestions.length }}문항</small>
         </header>
-        <ol>
-          <li v-for="question in interviewQuestions" :key="question">{{ question }}</li>
+
+        <p v-if="questionsLoading" class="state">불러오는 중입니다...</p>
+        <p v-else-if="questionsErrorMessage" class="state error">{{ questionsErrorMessage }}</p>
+        <div v-else-if="!questionsExist" class="generate-panel">
+          <p class="state">아직 생성된 면접 질문이 없어요.</p>
+          <button type="button" :disabled="questionsGenerating" @click="generateInterviewQuestions">
+            {{ questionsGenerating ? '생성 중...' : '면접 질문 생성' }}
+          </button>
+        </div>
+        <ol v-else>
+          <li v-for="question in interviewQuestions" :key="question.id ?? question.question">
+            {{ question.question }}
+            <small v-if="question.sampleAnswer">{{ question.sampleAnswer }}</small>
+          </li>
         </ol>
       </section>
     </div>
@@ -157,6 +222,44 @@ li {
 li::marker {
   color: #e31b23;
   font-weight: 700;
+}
+
+li small {
+  display: block;
+  margin-top: 4px;
+  color: #999;
+}
+
+.state {
+  padding: 24px 0;
+  color: #999;
+  text-align: center;
+}
+
+.state.error {
+  color: #e31b23;
+}
+
+.generate-panel {
+  display: grid;
+  gap: 12px;
+  place-items: center;
+}
+
+.generate-panel button {
+  padding: 8px 16px;
+  border: 1px solid #e31b23;
+  border-radius: 5px;
+  color: #e31b23;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.generate-panel button:disabled {
+  border-color: #ddd;
+  color: #bbb;
+  cursor: not-allowed;
 }
 
 @media (max-width: 760px) {

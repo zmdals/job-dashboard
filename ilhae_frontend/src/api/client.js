@@ -408,4 +408,9 @@ export const api = {
       }
     );
   },
+
+  // 면접 질문 조회 (생성된 게 없으면 404)
+  getInterviewQuestions(applicationId) {
+    return request(`/applications/${applicationId}/ai/interview-questions`);
+  },
 };

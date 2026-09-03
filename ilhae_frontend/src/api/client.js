@@ -10,7 +10,10 @@ export class ApiError extends Error {
 }
 
 function getAccessToken() {
-  return localStorage.getItem("accessToken");
+  return (
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("accessToken")
+  );
 }
 
 async function request(path, options = {}) {

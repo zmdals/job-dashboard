@@ -5,7 +5,6 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 import { api } from "@/api/client.js";
-import AdditionalInfoForm from "./AdditionalInfoForm.vue";
 
 const router = useRouter();
 
@@ -14,10 +13,7 @@ const password = ref("");
 //const emit = defineEmits(['login', 'signup'])
 const errorMessage = ref("");
 const loading = ref(false);
-const showAdditionalInput = ref(false);
-const toggleAdditionalInput = () => {
-  showAdditionalInput.value = !showAdditionalInput.value;
-};
+
 async function handleSignup() {
   console.log("signup", { email: email.value, password: password.value });
   if (!email.value || !password.value) {
@@ -67,19 +63,22 @@ async function handleSignup() {
         ></FormField>
         <FormField
           label="이름"
-          type=""
+          type="text"
           v-model="name"
           placeholder="이름을 입력하세요"
+        ></FormField>
+        <FormField
+          label="전화번호"
+          type="tel"
+          placeholder="010-1234-5678"
+          pattern="[0-9]{3}-[0-9]{3,4}-[0-9]{4}"
+          v-model="name"
         ></FormField>
         <button type="submit" :disabled="loading">
           {{ loading ? "회원가입 중..." : "회원가입" }}
         </button>
       </form>
-      <button @click="toggleAdditionalInput">추가 정보</button>
     </div>
-  </OurBox>
-  <OurBox v-show="showAdditionalInput">
-    <AdditionalInfoForm />
   </OurBox>
 </template>
 

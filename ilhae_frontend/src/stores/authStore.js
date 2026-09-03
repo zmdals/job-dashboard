@@ -4,7 +4,8 @@ import { api } from '@/api/client'
 
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(
-    localStorage.getItem('accessToken'),
+    localStorage.getItem('accessToken') ??
+      sessionStorage.getItem('accessToken'),
   )
   const loading = ref(false)
   const error = ref(null)
@@ -13,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
     () => Boolean(accessToken.value),
   )
 
-  async function login(id, password) {
+  async function login(id, password, remember = false) {
     loading.value = true
     error.value = null
 
@@ -21,10 +22,11 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.login({ id, password })
 
       accessToken.value = response.accessToken
-      localStorage.setItem(
-        'accessToken',
-        response.accessToken,
-      )
+
+      const storage = remember ? localStorage : sessionStorage
+      const otherStorage = remember ? sessionStorage : localStorage
+      storage.setItem('accessToken', response.accessToken)
+      otherStorage.removeItem('accessToken')
 
       return response
     } catch (e) {
@@ -51,7 +53,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     accessToken.value = null
+    error.value = null
     localStorage.removeItem('accessToken')
+    sessionStorage.removeItem('accessToken')
   }
 
   return {

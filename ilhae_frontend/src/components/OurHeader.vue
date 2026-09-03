@@ -25,10 +25,10 @@ function gotoPosts() {
 function gotoProfile() {
   router.push('/profile')
 }
-function logout() {
+async function logout() {
   authStore.logout()
   meStore.reset()
-  router.push('/')
+  await router.replace({ name: 'login' })
 }
 </script>
 

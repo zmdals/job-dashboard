@@ -19,7 +19,9 @@ export const useMeStore = defineStore('me', () => {
 
   const starredPostingIds = computed(
     () => new Set(
-      starredPostings.value.map((posting) => String(posting.id)),
+      starredPostings.value.map(
+        (posting) => String(posting.jobPostingId ?? posting.id),
+      ),
     ),
   )
 
@@ -53,6 +55,21 @@ export const useMeStore = defineStore('me', () => {
         application.jobTitle ?? application.posting?.title,
       status:
         application.status ?? application.applicationStatus,
+    }
+  }
+
+  function normalizeStarredPosting(starredPosting) {
+    const hasSeparatePostingId = starredPosting.jobPostingId != null
+    const jobPostingId = starredPosting.jobPostingId ?? starredPosting.id
+
+    return {
+      ...starredPosting,
+      id: jobPostingId,
+      jobPostingId,
+      starredPostingId:
+        starredPosting.starredPostingId ??
+        (hasSeparatePostingId ? starredPosting.id : null),
+      title: starredPosting.title ?? starredPosting.jobTitle,
     }
   }
 
@@ -213,8 +230,8 @@ export const useMeStore = defineStore('me', () => {
 
   async function fetchStarredPostings() {
     return run(async () => {
-      starredPostings.value =
-        await api.getMyStarredPostings()
+      const response = await api.getMyStarredPostings()
+      starredPostings.value = response.map(normalizeStarredPosting)
       hasLoadedStarredPostings.value = true
 
       return starredPostings.value
@@ -243,8 +260,8 @@ export const useMeStore = defineStore('me', () => {
         await api.starPosting(postingId)
       }
 
-      starredPostings.value =
-        await api.getMyStarredPostings()
+      const response = await api.getMyStarredPostings()
+      starredPostings.value = response.map(normalizeStarredPosting)
       hasLoadedStarredPostings.value = true
     })
   }

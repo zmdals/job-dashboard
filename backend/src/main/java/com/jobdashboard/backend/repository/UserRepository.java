@@ -4,7 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.jobdashboard.backend.entity.User;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    // User 엔티티에 대한 CRUD 메서드 제공
+import java.util.Optional;
 
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+    boolean existsByEmail(String email);
 }

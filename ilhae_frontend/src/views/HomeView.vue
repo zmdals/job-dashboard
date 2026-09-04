@@ -71,6 +71,14 @@ async function removeApplication(applicationId) {
     return
   }
 }
+
+function markAnalysisAvailable(applicationId) {
+  meStore.markApplicationAnalyzed(applicationId)
+}
+
+function markCoverLetterAvailable(applicationId) {
+  meStore.markApplicationHasCoverLetter(applicationId)
+}
 </script>
 
 <template>
@@ -97,6 +105,8 @@ async function removeApplication(applicationId) {
       :applications="filteredApplications"
       @update-status="updateStatus"
       @delete="removeApplication"
+      @analysis-updated="markAnalysisAvailable"
+      @cover-letter-created="markCoverLetterAvailable"
     />
   </main>
 </template>

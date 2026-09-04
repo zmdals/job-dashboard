@@ -14,19 +14,26 @@ export const useAuthStore = defineStore('auth', () => {
     () => Boolean(accessToken.value),
   )
 
-  async function login(id, password, remember = false) {
+  function saveAccessToken(token, remember = false) {
+    if (!token) {
+      throw new Error('서버에서 인증 토큰을 받지 못했습니다.')
+    }
+
+    accessToken.value = token
+
+    const storage = remember ? localStorage : sessionStorage
+    const otherStorage = remember ? sessionStorage : localStorage
+    storage.setItem('accessToken', token)
+    otherStorage.removeItem('accessToken')
+  }
+
+  async function login(email, password, remember = false) {
     loading.value = true
     error.value = null
 
     try {
-      const response = await api.login({ id, password })
-
-      accessToken.value = response.accessToken
-
-      const storage = remember ? localStorage : sessionStorage
-      const otherStorage = remember ? sessionStorage : localStorage
-      storage.setItem('accessToken', response.accessToken)
-      otherStorage.removeItem('accessToken')
+      const response = await api.login({ email, password })
+      saveAccessToken(response.accessToken, remember)
 
       return response
     } catch (e) {
@@ -42,7 +49,9 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      return await api.signup(payload)
+      const response = await api.signup(payload)
+      saveAccessToken(response.accessToken)
+      return response
     } catch (e) {
       error.value = e
       throw e

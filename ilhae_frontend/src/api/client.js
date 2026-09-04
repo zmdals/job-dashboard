@@ -1,4 +1,5 @@
 const API_BASE_URL = "/api";
+const API_LOG_ENABLED = import.meta.env.DEV;
 
 export class ApiError extends Error {
   constructor(message, { status, code } = {}) {
@@ -19,6 +20,8 @@ function getAccessToken() {
 async function request(path, options = {}) {
   const headers = new Headers(options.headers || {});
   const token = getAccessToken();
+  const method = options.method || "GET";
+  const url = `${API_BASE_URL}${path}`;
 
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -28,10 +31,28 @@ async function request(path, options = {}) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
+  if (API_LOG_ENABLED) {
+    console.info(`[API 요청] ${method} ${url}`);
+  }
+
+  let response;
+
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    });
+  } catch (error) {
+    if (API_LOG_ENABLED) {
+      console.error(`[API 연결 실패] ${method} ${url}`, error);
+    }
+    throw error;
+  }
+
+  if (API_LOG_ENABLED) {
+    const log = response.ok ? console.info : console.error;
+    log(`[API 응답] ${response.status} ${method} ${url}`);
+  }
 
   if (response.status === 204) {
     return null;
@@ -143,9 +164,9 @@ export const api = {
     return request(`/companies/${companyId}`);
   },
 
-  // 맞춤 기업 리포트 자료 조회
-  getCompanyEvidences(companyId) {
-    return request(`/companies/${companyId}/evidences`);
+  // AI 맞춤 기업 리포트 조회
+  getCompanyReport(companyId) {
+    return request(`/companies/${companyId}/ai/report`);
   },
 
   // =========================
@@ -356,27 +377,35 @@ export const api = {
   // Cover Letters
   // =========================
 
-  // 자소서 작성
+  // 자소서 생성 (지원 내역당 1개)
   createCoverLetter(applicationId, payload) {
-    return request(`/applications/${applicationId}/cover-letters`, {
+    return request(`/applications/${applicationId}/cover-letter`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
-  // 자소서 목록 조회
-  getCoverLetters(applicationId) {
-    return request(`/applications/${applicationId}/cover-letters`);
+  // 자소서 단건 조회
+  getCoverLetter(applicationId) {
+    return request(`/applications/${applicationId}/cover-letter`);
   },
 
   // =========================
   // AI Mock API
   // =========================
 
+  // 공고 적합도 분석 (비저장, 상세 모달용)
+  getPostingRelevance(postingId) {
+    return request(`/postings/${postingId}/ai/relevance`, {
+      method: "POST",
+    });
+  },
+
   // 지원서 매칭 분석 요청
-  requestApplicationAnalysis(applicationId) {
+  requestApplicationAnalysis(applicationId, includeCoverLetter = false) {
     return request(`/applications/${applicationId}/ai/analysis`, {
       method: "POST",
+      body: JSON.stringify({ includeCoverLetter }),
     });
   },
 
@@ -400,5 +429,10 @@ export const api = {
         method: "POST",
       }
     );
+  },
+
+  // 면접 질문 조회 (생성된 게 없으면 404)
+  getInterviewQuestions(applicationId) {
+    return request(`/applications/${applicationId}/ai/interview-questions`);
   },
 };

@@ -8,7 +8,9 @@ const router = useRouter()
 const authStore = useAuthStore()
 const meStore = useMeStore()
 
-const userName = computed(() => meStore.profile?.name || '김청년')
+const userName = computed(
+  () => meStore.profile?.name || authStore.userName || '사용자',
+)
 
 onMounted(() => {
   if (authStore.isAuthenticated) {

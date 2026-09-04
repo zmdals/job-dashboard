@@ -73,6 +73,33 @@ export const useMeStore = defineStore('me', () => {
     }
   }
 
+  async function loadStarredPostings() {
+    const response = await api.getMyStarredPostings()
+
+    return Promise.all(
+      response.map(async (starredPosting) => {
+        const normalized = normalizeStarredPosting(starredPosting)
+
+        if (normalized.relevanceScore != null) {
+          return normalized
+        }
+
+        try {
+          const posting = await api.getPosting(normalized.jobPostingId)
+          return {
+            ...normalized,
+            ...posting,
+            id: normalized.jobPostingId,
+            jobPostingId: normalized.jobPostingId,
+            starredPostingId: normalized.starredPostingId,
+          }
+        } catch {
+          return normalized
+        }
+      }),
+    )
+  }
+
   function isStarred(postingId) {
     return starredPostingIds.value.has(String(postingId))
   }
@@ -230,8 +257,7 @@ export const useMeStore = defineStore('me', () => {
 
   async function fetchStarredPostings() {
     return run(async () => {
-      const response = await api.getMyStarredPostings()
-      starredPostings.value = response.map(normalizeStarredPosting)
+      starredPostings.value = await loadStarredPostings()
       hasLoadedStarredPostings.value = true
 
       return starredPostings.value
@@ -260,8 +286,7 @@ export const useMeStore = defineStore('me', () => {
         await api.starPosting(postingId)
       }
 
-      const response = await api.getMyStarredPostings()
-      starredPostings.value = response.map(normalizeStarredPosting)
+      starredPostings.value = await loadStarredPostings()
       hasLoadedStarredPostings.value = true
     })
   }

@@ -9,13 +9,48 @@
 
 ## **R&R**
 
-| 이름   | 역할        | 담당                                                       | GitHub                          |
-| ------ | ----------- | ---------------------------------------------------------- | ------------------------------- |
-| 임승민 | Backend, DB | Auth, Application, AI Mock API, 코드 리뷰, GitHub 형상관리 | https://github.com/zmdals       |
-| 황가인 | Backend, DB | User 및 User 하위 API 개발, ERD 생성                       | https://github.com/gainhwang    |
-| 장서연 | Frontend    | 지원 현황 · 내 프로필 페이지, API 연동 구현                | https://github.com/seoyeonskala |
-| 신동운 | PM          | FE 자기소개서 API 연동, BE 선호 공고 CRUD 개발, 발표       | https://github.com/shindw3798   |
-| 신동범 | Frontend    | 로그인 · 채용공고 페이지, 반응형 모바일 웹 화면 구현       | https://github.com/tls8012      |
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>역할</th>
+            <th>담당</th>
+            <th>GitHub</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="white-space: nowrap;">임승민</td>
+            <td>Backend, DB</td>
+            <td>Auth, Application, AI Mock API, 코드 리뷰, GitHub 형상관리</td>
+            <td><a href="https://github.com/zmdals">https://github.com/zmdals</a></td>
+        </tr>
+        <tr>
+            <td style="white-space: nowrap;">황가인</td>
+            <td>Backend, DB</td>
+            <td>User 및 User 하위 API 개발, ERD 생성</td>
+            <td><a href="https://github.com/gainhwang">https://github.com/gainhwang</a></td>
+        </tr>
+        <tr>
+            <td style="white-space: nowrap;">장서연</td>
+            <td>Frontend</td>
+            <td>지원 현황 · 내 프로필 페이지, API 연동 구현</td>
+            <td><a href="https://github.com/seoyeonskala">https://github.com/seoyeonskala</a></td>
+        </tr>
+        <tr>
+            <td style="white-space: nowrap;">신동운</td>
+            <td>PM</td>
+            <td>FE 자기소개서 API 연동, BE 선호 공고 CRUD 개발, 발표</td>
+            <td><a href="https://github.com/shindw3798">https://github.com/shindw3798</a></td>
+        </tr>
+        <tr>
+            <td style="white-space: nowrap;">신동범</td>
+            <td>Frontend</td>
+            <td>로그인 · 채용공고 페이지, 반응형 모바일 웹 화면 구현</td>
+            <td><a href="https://github.com/tls8012">https://github.com/tls8012</a></td>
+        </tr>
+    </tbody>
+</table>
 
 ## 프로젝트 개요
 
@@ -104,7 +139,7 @@ backend/src/main/java/com/jobdashboard/backend/
 ### Backend
 
 ```bash
-cd backend
+cd ilhae_backend
 # .env 파일 설정 (DB URL, JWT Secret 등)
 ./gradlew bootRun
 # http://localhost:8080/swagger-ui/index.html
@@ -113,7 +148,7 @@ cd backend
 ### Frontend
 
 ```bash
-cd frontend
+cd ilhae_frontend
 npm install
 npm run dev
 # http://localhost:5173

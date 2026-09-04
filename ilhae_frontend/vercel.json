@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://job-dashboard-cr7p.onrender.com/api/:path*"
+      
+    }
+  ]
+}

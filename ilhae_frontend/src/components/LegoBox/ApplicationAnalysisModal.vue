@@ -20,13 +20,15 @@ const emit = defineEmits(['close', 'analyzed'])
 const analysis = ref(null)
 const loading = ref(false)
 const reanalyzing = ref(false)
+const checkingCoverLetter = ref(true)
+const hasCoverLetter = ref(false)
 const errorMessage = ref('')
 
 const subtitle = computed(() =>
   [props.application.companyName, props.application.jobTitle].filter(Boolean).join(' · '),
 )
 
-async function createAnalysis(includeCoverLetter, isReanalysis = false) {
+async function createAnalysis(includeCoverLetter = true, isReanalysis = false) {
   if (isReanalysis) {
     reanalyzing.value = true
   } else {
@@ -40,10 +42,7 @@ async function createAnalysis(includeCoverLetter, isReanalysis = false) {
   })
 
   try {
-    analysis.value = await api.requestApplicationAnalysis(
-      props.application.id,
-      includeCoverLetter,
-    )
+    analysis.value = await api.requestApplicationAnalysis(props.application.id, includeCoverLetter)
     emit('analyzed', props.application.id)
   } catch (error) {
     errorMessage.value = error.message || 'AI 분석을 요청하지 못했습니다.'
@@ -66,16 +65,30 @@ async function getAnalysis() {
   }
 }
 
+async function checkCoverLetter() {
+  checkingCoverLetter.value = true
+
+  try {
+    const coverLetter = await api.getCoverLetter(props.application.id)
+    hasCoverLetter.value = coverLetter?.id != null
+  } catch {
+    hasCoverLetter.value = false
+  } finally {
+    checkingCoverLetter.value = false
+  }
+}
+
 function loadInitialAnalysis() {
   if (props.initialAction === 'create') {
-    return createAnalysis(Boolean(props.application.hasCoverLetter))
+    return createAnalysis(true)
   }
 
   return getAnalysis()
 }
 
-onMounted(() => {
-  void loadInitialAnalysis()
+onMounted(async () => {
+  await checkCoverLetter()
+  await loadInitialAnalysis()
 })
 </script>
 
@@ -93,6 +106,7 @@ onMounted(() => {
         <small>종합 적합도</small>
         <strong>{{ analysis.score }}<span>%</span></strong>
         <p>{{ analysis.summary }}</p>
+        <span v-if="analysis.includedCoverLetter" class="included-label">자기소개서 포함</span>
       </section>
 
       <div class="analysis-details">
@@ -117,16 +131,23 @@ onMounted(() => {
           <p>{{ analysis.recommendation }}</p>
         </section>
 
-        <p v-if="!application.hasCoverLetter" class="cover-letter-guide">
+        <p v-if="analysis.includedCoverLetter === false" class="cover-letter-guide">
           자기소개서를 작성하면 점수가 올라갈 수 있어요. 작성 후 다시 분석해 보세요.
         </p>
       </div>
     </div>
 
     <template #actions>
-      <button type="button" @click="emit('close')">닫기</button>
       <button
-        v-if="analysis && application.hasCoverLetter"
+        type="button"
+        class="close-action"
+        :class="{ 'full-width': !hasCoverLetter }"
+        @click="emit('close')"
+      >
+        닫기
+      </button>
+      <button
+        v-if="analysis && hasCoverLetter"
         class="primary"
         type="button"
         :disabled="reanalyzing"
@@ -188,6 +209,22 @@ onMounted(() => {
 .score-panel p,
 .result-section p {
   margin: 0;
+}
+
+.included-label {
+  align-self: center;
+  margin-top: 14px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #9c171d;
+  background: #ffe2e3;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.close-action.full-width {
+  width: 100%;
+  flex-basis: 100%;
 }
 
 .analysis-details {

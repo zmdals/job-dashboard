@@ -420,10 +420,10 @@ export const api = {
   },
 
   // 지원서 매칭 분석 요청
-  requestApplicationAnalysis(applicationId, includeCoverLetter = false) {
+  requestApplicationAnalysis(applicationId, includeCoverLetter = true) {
     return request(`/applications/${applicationId}/ai/analysis`, {
       method: "POST",
-      body: JSON.stringify({ includeCoverLetter }),
+      body: JSON.stringify({ includeCoverLetter: includeCoverLetter === true }),
     });
   },
 

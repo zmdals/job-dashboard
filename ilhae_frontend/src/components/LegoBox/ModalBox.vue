@@ -132,6 +132,13 @@ p {
   background: #e31b23;
 }
 
+.modal-actions :deep(button:disabled) {
+  border-color: #ddd;
+  color: #aaa;
+  background: #f3f3f3;
+  cursor: not-allowed;
+}
+
 @media (max-width: 760px) {
   .modal-box {
     padding: 22px;

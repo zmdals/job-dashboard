@@ -165,8 +165,8 @@ export const api = {
   },
 
   // 맞춤 기업 리포트 자료 조회
-  getCompanyEvidences(companyId) {
-    return request(`/companies/${companyId}/evidences`);
+  getCompanyReport(companyId) {
+    return request(`/companies/${companyId}/ai/report`);
   },
 
   // =========================

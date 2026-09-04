@@ -162,7 +162,7 @@ export const handlers = [
     return json(company)
   }),
 
-  http.get(`${API}/companies/:companyId/evidences`, async ({ params }) => {
+  http.get(`${API}/companies/:companyId/ai/report`, async ({ params }) => {
     await latency()
 
     const db = getDb()

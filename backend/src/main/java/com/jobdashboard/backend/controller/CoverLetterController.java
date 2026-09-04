@@ -41,7 +41,7 @@ public class CoverLetterController {
     }
 
     @Operation(summary = "자소서 수정", description = "자소서를 수정합니다")
-    @PutMapping("/api/applications/{applicationId}/cover-letters/{coverLetterId}")
+    @PutMapping("/api/applications/{applicationId}/cover-letter/{coverLetterId}")
     public ApiResponse<CoverLetterRes> update(
             @PathVariable Long applicationId,
             @PathVariable Long coverLetterId,
@@ -52,7 +52,7 @@ public class CoverLetterController {
     }
 
     @Operation(summary = "자소서 삭제", description = "자소서를 삭제합니다")
-    @DeleteMapping("/api/applications/{applicationId}/cover-letters/{coverLetterId}")
+    @DeleteMapping("/api/applications/{applicationId}/cover-letter/{coverLetterId}")
     public ApiResponse<Void> remove(
             @PathVariable Long applicationId,
             @PathVariable Long coverLetterId,

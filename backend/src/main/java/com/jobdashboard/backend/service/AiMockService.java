@@ -13,12 +13,15 @@ import com.jobdashboard.backend.entity.enums.AiStatus;
 import com.jobdashboard.backend.entity.enums.InterviewCategory;
 import com.jobdashboard.backend.exception.ResourceNotFoundException;
 import com.jobdashboard.backend.repository.*;
+import com.jobdashboard.backend.util.MockScoreUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import static com.jobdashboard.backend.util.MockScoreUtil.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +40,9 @@ public class AiMockService {
     //    → 나중에 AI 붙이면 유저 스펙 vs 공고 요건 비교 로직으로 교체
     // ============================================================
     public RelevanceRes getRelevance(Long postingId) {
+        int score = fromId(postingId);
         return RelevanceRes.builder()
-                .score(78)
+                .score(score)
                 .summary("지원자의 컴퓨터공학 전공과 Spring Boot 프로젝트 경험이 해당 공고 요건에 부합합니다.")
                 .strengths(List.of(
                         "컴퓨터공학 전공 (필수 요건 충족)",

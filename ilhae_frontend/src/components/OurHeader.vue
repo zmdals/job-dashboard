@@ -40,7 +40,7 @@ async function logout() {
     </button>
 
     <nav class="home-nav" aria-label="주요 메뉴">
-      <button type="button" :class="{ active: $route.name === 'home' }" @click="gotoHome">HOME</button>
+      <button type="button" :class="{ active: $route.name === 'home' }" @click="gotoHome">지원현황</button>
       <button
         type="button"
         :class="{ active: ['postings', 'posting-report'].includes($route.name) }"
@@ -52,7 +52,7 @@ async function logout() {
     </nav>
 
     <div class="user-menu">
-      {{ userName }}
+      {{ userName }} 님
       <button class="logout" type="button" @click="logout">로그아웃</button>
     </div>
   </header>

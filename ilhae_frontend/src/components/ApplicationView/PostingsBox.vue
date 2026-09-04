@@ -11,7 +11,7 @@ import PostingTabs from '@/components/LegoBox/PostingTabs.vue'
 import { useMeStore } from '@/stores/meStore'
 import { usePostingsStore } from '@/stores/postingsStore'
 
-const PAGE_SIZE = 3
+const PAGE_SIZE = 5
 
 const postingsStore = usePostingsStore()
 const meStore = useMeStore()

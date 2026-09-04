@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import SwaggerDocs from "@/views/SwaggerDocs.vue";
 import LoginView from "@/views/LoginView.vue";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -44,12 +43,7 @@ const router = createRouter({
       name: "profile",
       component: () => import("@/views/ProfileView.vue"),
       meta: { requiresAuth: true },
-    },
-    {
-      path: "/docs",
-      component: SwaggerDocs,
-    },
-
+    }
   ],
 });
 

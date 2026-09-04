@@ -88,6 +88,8 @@ const form = ref({ title: '', content: '' })
 const loading = ref(false)
 const saving = ref(false)
 const analyzing = ref(false)
+const deleting = ref(false)
+const isEditing = ref(false)
 const loadError = ref('')
 const formError = ref('')
 
@@ -113,7 +115,21 @@ async function loadCoverLetter() {
   }
 }
 
-async function createCoverLetter() {
+function startEdit() {
+  form.value = {
+    title: coverLetter.value?.title || '',
+    content: coverLetter.value?.content || '',
+  }
+  formError.value = ''
+  isEditing.value = true
+}
+
+function cancelEdit() {
+  isEditing.value = false
+  formError.value = ''
+}
+
+async function saveCoverLetter() {
   formError.value = ''
 
   if (!form.value.content.trim()) {
@@ -123,17 +139,47 @@ async function createCoverLetter() {
 
   saving.value = true
 
+  const payload = {
+    title: form.value.title.trim() || null,
+    content: form.value.content.trim(),
+  }
+
   try {
-    coverLetter.value = await api.createCoverLetter(props.application.id, {
-      title: form.value.title.trim() || null,
-      content: form.value.content.trim(),
-    })
+    if (isEditing.value && coverLetter.value) {
+      coverLetter.value = await api.updateCoverLetter(
+        props.application.id,
+        coverLetter.value.id,
+        payload,
+      )
+      isEditing.value = false
+    } else {
+      coverLetter.value = await api.createCoverLetter(props.application.id, payload)
+      emit('coverLetterCreated', props.application.id)
+    }
     feedback.value = null
-    emit('coverLetterCreated', props.application.id)
   } catch (error) {
-    formError.value = error.message || '자기소개서 생성에 실패했습니다.'
+    formError.value = error.message || '자기소개서 저장에 실패했습니다.'
   } finally {
     saving.value = false
+  }
+}
+
+async function deleteCoverLetter() {
+  if (!coverLetter.value?.id) return
+  if (!confirm('자기소개서를 삭제할까요?')) return
+
+  deleting.value = true
+  formError.value = ''
+
+  try {
+    await api.deleteCoverLetter(props.application.id, coverLetter.value.id)
+    coverLetter.value = null
+    feedback.value = null
+    form.value = { title: '', content: '' }
+  } catch (error) {
+    formError.value = error.message || '자기소개서 삭제에 실패했습니다.'
+  } finally {
+    deleting.value = false
   }
 }
 
@@ -157,6 +203,7 @@ watch(
   () => {
     coverLetter.value = null
     form.value = { title: '', content: '' }
+    isEditing.value = false
     void loadCoverLetter()
   },
   { immediate: true },
@@ -208,17 +255,27 @@ watch(
       <div v-else class="preparation-layout" :class="{ sideBySide: feedback }">
         <section class="document-panel">
           <header class="panel-head">
-            <span>{{ coverLetter ? '저장된 자기소개서' : '새 자기소개서' }}</span>
-            <small v-if="coverLetter">v{{ coverLetter.version }}</small>
-            <small v-else>작성 후 저장해 주세요</small>
+            <span>
+              {{ coverLetter && !isEditing ? '저장된 자기소개서' : isEditing ? '자기소개서 수정' : '새 자기소개서' }}
+            </span>
+            <div class="panel-head-right">
+              <small v-if="coverLetter && !isEditing">v{{ coverLetter.version }}</small>
+              <small v-else-if="!isEditing">작성 후 저장해 주세요</small>
+              <span v-if="coverLetter && !isEditing" class="item-actions">
+                <button type="button" @click="startEdit">수정</button> |
+                <button type="button" :disabled="deleting" @click="deleteCoverLetter">
+                  {{ deleting ? '삭제 중...' : '삭제' }}
+                </button>
+              </span>
+            </div>
           </header>
 
-          <div v-if="coverLetter" class="cover-letter-view">
+          <div v-if="coverLetter && !isEditing" class="cover-letter-view">
             <h4>{{ coverLetter.title || '제목 없음' }}</h4>
             <p>{{ coverLetter.content }}</p>
           </div>
 
-          <form v-else class="cover-letter-form" @submit.prevent="createCoverLetter">
+          <form v-else class="cover-letter-form" @submit.prevent="saveCoverLetter">
             <label for="cover-letter-title">제목</label>
             <input
               id="cover-letter-title"
@@ -263,16 +320,23 @@ watch(
     <template #actions>
       <button type="button" @click="$emit('close')">닫기</button>
       <button
-        v-if="!isInterviewMode && !loading && !loadError && !coverLetter"
+        v-if="!isInterviewMode && isEditing"
+        type="button"
+        @click="cancelEdit"
+      >
+        편집 취소
+      </button>
+      <button
+        v-if="!isInterviewMode && !loading && !loadError && (isEditing || !coverLetter)"
         class="primary"
         type="button"
         :disabled="saving"
-        @click="createCoverLetter"
+        @click="saveCoverLetter"
       >
-        {{ saving ? '생성 중...' : '자기소개서 생성' }}
+        {{ saving ? '저장 중...' : isEditing ? '수정 완료' : '자기소개서 생성' }}
       </button>
       <button
-        v-if="!isInterviewMode && coverLetter"
+        v-if="!isInterviewMode && coverLetter && !isEditing"
         class="primary"
         type="button"
         :disabled="analyzing"
@@ -320,6 +384,35 @@ watch(
 .panel-head small {
   color: #999;
   font-size: 10px;
+}
+
+.panel-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-actions {
+  color: #999;
+  font-size: 10px;
+}
+
+.item-actions button {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: none;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.item-actions button:hover:not(:disabled) {
+  color: #e31b23;
+}
+
+.item-actions button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
 }
 
 .document-section + .document-section {

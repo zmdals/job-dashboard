@@ -393,6 +393,21 @@ export const api = {
     return request(`/applications/${applicationId}/cover-letter`);
   },
 
+  // 자소서 수정
+  updateCoverLetter(applicationId, coverLetterId, payload) {
+    return request(`/applications/${applicationId}/cover-letter/${coverLetterId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // 자소서 삭제
+  deleteCoverLetter(applicationId, coverLetterId) {
+    return request(`/applications/${applicationId}/cover-letter/${coverLetterId}`, {
+      method: "DELETE",
+    });
+  },
+
   // =========================
   // AI Mock API
   // =========================

@@ -27,14 +27,14 @@ public class JobPostingService {
     public Page<JobPostingRes> getAllPostings(Pageable pageable) {
         return jobPostingRepository.findAll(pageable)
                 // 가상 랜덤 점수 넘김.
-                .map(posting -> JobPostingRes.from(posting, generateMockScore()));
+                .map(posting -> JobPostingRes.from(posting, generateMockScore(posting.getId())));
     }
 
     // 단일 상세 조회 → findById → 없으면 ResourceNotFoundException
     public JobPostingRes getPosting(Long postingId) {
         JobPosting jobPosting = jobPostingRepository.findById(postingId)
                 .orElseThrow(() -> new ResourceNotFoundException("공고를 찾을 수 없습니다."));
-        return JobPostingRes.from(jobPosting, generateMockScore());
+        return JobPostingRes.from(jobPosting, generateMockScore(postingId));
     }
 
     // 공고 생성 → @Transactional 붙이고 save
@@ -44,7 +44,7 @@ public class JobPostingService {
                 .orElseThrow(() -> new ResourceNotFoundException("회사를 찾을 수 없습니다."));
         JobPosting jobPosting = req.toEntity(company);
         JobPosting savedPosting = jobPostingRepository.save(jobPosting);
-        return JobPostingRes.from(savedPosting,generateMockScore());
+        return JobPostingRes.from(savedPosting, generateMockScore(savedPosting.getId()));
     }
 
     // 공고 수정
@@ -57,7 +57,7 @@ public class JobPostingService {
         jobPosting.update(req.getTitle(), req.getUrl(), req.getJobType(),
                 req.getLocation(), req.getAnnualIncome(),
                 req.getDeadline(), req.getDescription());
-        return JobPostingRes.from(jobPosting,generateMockScore());
+        return JobPostingRes.from(jobPosting, generateMockScore(postingId));
     }
 
     // 공고 삭제 → @Transactional 붙이고 deleteById
@@ -69,8 +69,9 @@ public class JobPostingService {
         jobPostingRepository.deleteById(postingId);
     }
 
-    // Mock: 60~95 사이 랜덤 점수 - AI 붙이면 실제 계산 로직 들어감.
-    private Integer generateMockScore() {
-        return 60 + new Random().nextInt(36);
+    // Mock: postingId 기반 60~95 사이 랜덤 점수 - AI 붙이면 실제 계산 로직 들어가는 부분.
+    private Integer generateMockScore(Long postingId) {
+        int hash = postingId.hashCode();
+        return 60 + Math.abs(hash % 36); // 60~95 고정
     }
 }

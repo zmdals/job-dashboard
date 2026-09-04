@@ -51,6 +51,15 @@ function migrate(db) {
     changed = true
   }
 
+  if (storedVersion < 5) {
+    const initialUserById = new Map(initialMockDb.users.map((user) => [user.id, user]))
+
+    db.users?.forEach((user) => {
+      user.awards ??= clone(initialUserById.get(user.id)?.awards ?? [])
+    })
+    changed = true
+  }
+
   if (storedVersion < initialMockDb.mockDataVersion) {
     db.mockDataVersion = initialMockDb.mockDataVersion
     changed = true

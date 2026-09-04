@@ -41,6 +41,12 @@ const fieldSchemas = {
         { key: 'techStack', label: '기술 스택', type: 'text', placeholder: '사용한 기술' },
         { key: 'description', label: '설명', type: 'textarea', placeholder: '주요 내용이나 성과를 입력해 주세요' },
     ],
+    '수상 경력': [
+        { key: 'awardName', label: '수상명', type: 'text', placeholder: '수상명' },
+        { key: 'organizer', label: '주최기관', type: 'text', placeholder: '주최기관' },
+        { key: 'awardDate', label: '수상일', type: 'date' },
+        { key: 'description', label: '설명', type: 'textarea', placeholder: '수상 내용이나 성과를 입력해 주세요' },
+    ],
 }
 
 function mapEducation(item) {
@@ -71,26 +77,44 @@ function mapProject(item) {
         extra: item.techStack,
     }
 }
+function mapAward(item) {
+    return {
+        title: item.awardName,
+        period: item.awardDate,
+        extra: [item.organizer, item.description].filter(Boolean).join(' · '),
+    }
+}
 
 const education = ref([])
 const career = ref([])
 const projects = ref([])
 const certificates = ref([])
+const awards = ref([])
 
 const apiByCategory = {
     '학력': { add: api.addEducation, update: api.updateEducation, remove: api.deleteEducation },
     '자격증 · 어학': { add: api.addCertificate, update: api.updateCertificate, remove: api.deleteCertificate },
     '경력': { add: api.addCareer, update: api.updateCareer, remove: api.deleteCareer },
     '프로젝트': { add: api.addProject, update: api.updateProject, remove: api.deleteProject },
+    '수상 경력': { add: api.addAward, update: api.updateAward, remove: api.deleteAward },
 }
 
 onMounted(async () => {
     try {
-        const specs = await api.getMySpecs()
-        education.value = specs.educations ?? []
-        career.value = specs.careers ?? []
-        projects.value = specs.projects ?? []
-        certificates.value = specs.certificates ?? []
+        const [educationItems, careerItems, projectItems, certificateItems, awardItems] =
+            await Promise.all([
+                api.getEducations(),
+                api.getCareers(),
+                api.getProjects(),
+                api.getCertificates(),
+                api.getAwards(),
+            ])
+
+        education.value = educationItems
+        career.value = careerItems
+        projects.value = projectItems
+        certificates.value = certificateItems
+        awards.value = awardItems
     } catch (e) {
         console.error('내 스펙을 불러오지 못했습니다.', e)
     }
@@ -173,6 +197,15 @@ async function saveModal(formValue) {
                 :mapItem="mapProject"
                 @edit="item => openEditModal('프로젝트', projects, item)"
                 @remove="id => removeItem('프로젝트', projects, id)"
+            ></EditableTimeLineGroup>
+        </InfoCard>
+        <InfoCard title="수상 경력" @add="openAddModal('수상 경력', awards)">
+            <EditableTimeLineGroup
+                :items="awards"
+                idKey="id"
+                :mapItem="mapAward"
+                @edit="item => openEditModal('수상 경력', awards, item)"
+                @remove="id => removeItem('수상 경력', awards, id)"
             ></EditableTimeLineGroup>
         </InfoCard>
     </div>

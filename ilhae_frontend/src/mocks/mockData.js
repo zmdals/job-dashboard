@@ -1,5 +1,5 @@
 export const initialMockDb = {
-  mockDataVersion: 4,
+  mockDataVersion: 5,
 
   users: [
     {
@@ -49,6 +49,15 @@ export const initialMockDb = {
           description: '장려상 수상',
         },
       ],
+      awards: [
+        {
+          id: 'award-001',
+          awardName: '교내 캡스톤 경진대회 장려상',
+          organizer: '한국대학교',
+          awardDate: '2022-11-18',
+          description: '미생물 배양 자동화 프로젝트로 수상',
+        },
+      ],
     },
     {
       id: 'admin-001',
@@ -62,6 +71,7 @@ export const initialMockDb = {
       educations: [],
       careers: [],
       projects: [],
+      awards: [],
     },
   ],
 

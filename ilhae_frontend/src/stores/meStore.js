@@ -19,7 +19,7 @@ export const useMeStore = defineStore('me', () => {
 
   const starredPostingIds = computed(
     () => new Set(
-      starredPostings.value.map((posting) => String(posting.id)),
+      starredPostings.value.map((posting) => String(posting.jobPostingId)),
     ),
   )
 
@@ -54,6 +54,53 @@ export const useMeStore = defineStore('me', () => {
       status:
         application.status ?? application.applicationStatus,
     }
+  }
+
+  function normalizeStarredPosting(starredPosting) {
+    const jobPostingId =
+      starredPosting.jobPostingId ??
+      starredPosting.postingId ??
+      starredPosting.jobPosting?.id ??
+      starredPosting.id
+
+    return {
+      ...starredPosting,
+      starredPostingId:
+        starredPosting.jobPostingId != null
+          ? starredPosting.id
+          : starredPosting.starredPostingId,
+      id: jobPostingId,
+      jobPostingId,
+      title:
+        starredPosting.jobTitle ??
+        starredPosting.title ??
+        starredPosting.jobPosting?.title,
+      companyName:
+        starredPosting.companyName ??
+        starredPosting.jobPosting?.companyName ??
+        starredPosting.jobPosting?.company?.name,
+    }
+  }
+
+  async function hydrateStarredPosting(starredPosting) {
+    const normalized = normalizeStarredPosting(starredPosting)
+
+    try {
+      const posting = await api.getPosting(normalized.jobPostingId)
+      return {
+        ...posting,
+        ...normalized,
+        id: normalized.jobPostingId,
+        jobPostingId: normalized.jobPostingId,
+      }
+    } catch {
+      return normalized
+    }
+  }
+
+  async function loadStarredPostings() {
+    const response = await api.getMyStarredPostings()
+    return Promise.all(response.map(hydrateStarredPosting))
   }
 
   function isStarred(postingId) {
@@ -213,8 +260,7 @@ export const useMeStore = defineStore('me', () => {
 
   async function fetchStarredPostings() {
     return run(async () => {
-      starredPostings.value =
-        await api.getMyStarredPostings()
+      starredPostings.value = await loadStarredPostings()
       hasLoadedStarredPostings.value = true
 
       return starredPostings.value
@@ -243,8 +289,7 @@ export const useMeStore = defineStore('me', () => {
         await api.starPosting(postingId)
       }
 
-      starredPostings.value =
-        await api.getMyStarredPostings()
+      starredPostings.value = await loadStarredPostings()
       hasLoadedStarredPostings.value = true
     })
   }

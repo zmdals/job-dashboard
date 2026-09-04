@@ -164,9 +164,9 @@ export const api = {
     return request(`/companies/${companyId}`);
   },
 
-  // AI 맞춤 기업 리포트 조회
-  getCompanyReport(companyId) {
-    return request(`/companies/${companyId}/ai/report`);
+  // 맞춤 기업 리포트 자료 조회
+  getCompanyEvidences(companyId) {
+    return request(`/companies/${companyId}/evidences`);
   },
 
   // =========================
@@ -176,11 +176,6 @@ export const api = {
   // 학력 전체 조회
   getEducations() {
     return request("/me/educations");
-  },
-
-  // 학력 상세 조회
-  getEducation(educationId) {
-    return request(`/me/educations/${educationId}`);
   },
 
   // 학력 추가
@@ -211,11 +206,6 @@ export const api = {
     return request("/me/careers");
   },
 
-  // 경력 상세 조회
-  getCareer(careerId) {
-    return request(`/me/careers/${careerId}`);
-  },
-
   // 경력 추가
   addCareer(payload) {
     return request("/me/careers", {
@@ -244,11 +234,6 @@ export const api = {
     return request("/me/projects");
   },
 
-  // 프로젝트 상세 조회
-  getProject(projectId) {
-    return request(`/me/projects/${projectId}`);
-  },
-
   // 프로젝트 추가
   addProject(payload) {
     return request("/me/projects", {
@@ -272,9 +257,32 @@ export const api = {
     });
   },
 
-  // 내 스펙 전체 조회
-  getMySpecs() {
-    return request("/me/specs");
+  // 수상 경력 전체 조회
+  getAwards() {
+    return request("/me/awards");
+  },
+
+  // 수상 경력 추가
+  addAward(payload) {
+    return request("/me/awards", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // 수상 경력 수정
+  updateAward(awardId, payload) {
+    return request(`/me/awards/${awardId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // 수상 경력 삭제
+  deleteAward(awardId) {
+    return request(`/me/awards/${awardId}`, {
+      method: "DELETE",
+    });
   },
 
   // =========================
@@ -337,17 +345,12 @@ export const api = {
 
   // 내 정보 조회
   getMe() {
-    return request("/users/me");
+    return request("/me");
   },
 
   // 자격증 전체 조회
   getCertificates() {
     return request("/me/certificates");
-  },
-
-  // 자격증 상세 조회
-  getCertificate(certificateId) {
-    return request(`/me/certificates/${certificateId}`);
   },
 
   // 자격증 추가

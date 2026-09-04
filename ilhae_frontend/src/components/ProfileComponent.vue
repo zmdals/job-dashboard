@@ -292,6 +292,7 @@ async function saveModal(formValue) {
   }
   .profile-title h2 {
     margin-bottom: 8px;
+    font-size: 26px;
   }
   .info-grid {
     grid-template-columns: 1fr;

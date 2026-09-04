@@ -176,9 +176,10 @@ async function applySelected() {
 }
 
 .postings-content {
-  width: min(100% - 48px, 1060px);
+  width: 100%;
+  max-width: var(--page-content-width);
   margin: 0 auto;
-  padding: 48px 0 80px;
+  padding: var(--page-top-space) var(--page-gutter) var(--page-bottom-space);
 }
 
 .page-title {
@@ -219,8 +220,7 @@ async function applySelected() {
   }
 
   .postings-content {
-    width: calc(100% - 32px);
-    padding-top: 36px;
+    width: 100%;
   }
 
   .page-title h2 {

@@ -78,7 +78,7 @@ function markCoverLetterAvailable(applicationId) {
 </script>
 
 <template>
-  <main>
+  <main class="home-page">
     <div class="application-status">
       <h3>지원현황</h3>
       <p>나의 취업 여정을 한눈에 확인해 보세요.</p>
@@ -108,13 +108,18 @@ function markCoverLetterAvailable(applicationId) {
 </template>
 
 <style scoped>
+.home-page {
+  min-height: calc(100vh - 78px);
+  background: #fafafa;
+}
+
 .application-status {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  max-width: 1060px;
+  max-width: var(--page-content-width);
   margin: 0 auto;
-  padding: 56px 24px 20px;
+  padding: var(--page-top-space) var(--page-gutter) 20px;
 }
 .application-status h3 {
   margin: 0;
@@ -132,15 +137,16 @@ function markCoverLetterAvailable(applicationId) {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
-  max-width: 1060px;
+  max-width: var(--page-content-width);
   margin: 0 auto;
-  padding: 0 24px 24px;
+  padding: 0 var(--page-gutter) 24px;
 }
 .status-cards :deep(.stat-card:first-child .value) {
   color: #e31b23;
 }
 .list-state {
-  max-width: 1012px;
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: calc(var(--page-content-width) - var(--page-gutter) * 2);
   margin: 0 auto 80px;
   padding: 42px 24px;
   border-top: 1px solid #333;
@@ -152,15 +158,42 @@ function markCoverLetterAvailable(applicationId) {
 }
 
 @media (max-width: 760px) {
+  .home-page {
+    min-height: calc(100vh - 138px);
+  }
+
   .application-status {
     display: block;
-    padding-top: 36px;
   }
   .application-status h3 {
     margin-bottom: 8px;
   }
   .status-cards {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .application-status {
+    padding-bottom: 18px;
+  }
+
+  .application-status h3 {
+    font-size: 26px;
+  }
+
+  .application-status p {
+    line-height: 1.55;
+  }
+
+  .status-cards {
+    gap: 8px;
+    padding-bottom: 28px;
+  }
+
+  .list-state {
+    padding-right: 12px;
+    padding-left: 12px;
   }
 }
 </style>

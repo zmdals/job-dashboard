@@ -257,9 +257,9 @@ async function saveModal(formValue) {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  max-width: 1060px;
+  max-width: var(--page-content-width);
   margin: 0 auto;
-  padding: 56px 24px 20px;
+  padding: var(--page-top-space) var(--page-gutter) 20px;
 }
 .profile-title h2 {
   margin: 0;
@@ -278,9 +278,9 @@ async function saveModal(formValue) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   align-items: start;
-  max-width: 1060px;
+  max-width: var(--page-content-width);
   margin: 0 auto;
-  padding: 0 24px 80px;
+  padding: 0 var(--page-gutter) var(--page-bottom-space);
 }
 .project-card {
   grid-column: 1 / -1;
@@ -289,7 +289,6 @@ async function saveModal(formValue) {
 @media (max-width: 760px) {
   .profile-title {
     display: block;
-    padding-top: 36px;
   }
   .profile-title h2 {
     margin-bottom: 8px;

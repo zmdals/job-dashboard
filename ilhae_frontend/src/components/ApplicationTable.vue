@@ -15,12 +15,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits([
-  'updateStatus',
-  'delete',
-  'analysisUpdated',
-  'coverLetterCreated',
-])
+const emit = defineEmits(['updateStatus', 'delete', 'analysisUpdated', 'coverLetterCreated'])
 
 const selectedApplication = ref(null)
 const preparationMode = ref('cover-letter')
@@ -93,7 +88,9 @@ function handleCoverLetterCreated(applicationId) {
         <button
           type="button"
           :disabled="!canViewInterviewQuestions(app.status)"
-          :title="canViewInterviewQuestions(app.status) ? '' : '면접 예정 단계에서 확인할 수 있습니다.'"
+          :title="
+            canViewInterviewQuestions(app.status) ? '' : '면접 예정 단계에서 확인할 수 있습니다.'
+          "
           @click="openPreparation(app, 'interview')"
         >
           예상 면접 질문
@@ -140,32 +137,32 @@ function handleCoverLetterCreated(applicationId) {
 
 <style scoped>
 .app-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 1060px;
-    margin: 0 auto;
-    padding: 0 24px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--page-content-width);
+  margin: 0 auto;
+  padding: 0 var(--page-gutter) 14px;
 }
 
 .app-head h3 {
-    margin: 0;
-    font-size: 17px;
-    letter-spacing: -.05em;
-    color: #202124;
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -0.05em;
+  color: #202124;
 }
 
 .app-head span {
-    color: #999;
-    font-size: 11px;
+  color: #999;
+  font-size: 11px;
 }
 
 .app-table {
-    max-width: 1060px;
-    margin: 0 auto 80px;
-    padding: 0 24px;
-    border-top: 1px solid #333;
-    background: #fff;
+  max-width: var(--page-content-width);
+  margin: 0 auto 80px;
+  padding: 0 var(--page-gutter);
+  border-top: 1px solid #333;
+  background: #fff;
 }
 
 .empty-state {
@@ -178,38 +175,38 @@ function handleCoverLetterCreated(applicationId) {
 }
 
 .table-row {
-    display: grid;
-    grid-template-columns: 1.3fr .9fr 1.5fr minmax(110px, 1fr) 42px;
-    align-items: center;
-    gap: 20px;
-    min-height: 78px;
-    padding: 0 22px;
-    border-bottom: 1px solid #e7e7e7;
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr 1.5fr minmax(110px, 1fr) 42px;
+  align-items: center;
+  gap: 20px;
+  min-height: 78px;
+  padding: 0 22px;
+  border-bottom: 1px solid #e7e7e7;
 }
 
 .company-name {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #202124;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #202124;
 }
 
 .company-logo {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    color: #555;
-    background: #f0f0f0;
-    font-size: 11px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: #555;
+  background: #f0f0f0;
+  font-size: 11px;
 }
 
 .company-meta {
-    color: #999;
-    font-size: 11px;
+  color: #999;
+  font-size: 11px;
 }
 
 .preparation-actions {
@@ -247,18 +244,18 @@ function handleCoverLetterCreated(applicationId) {
 }
 
 .status-select {
-    width: 100%;
-    padding: 8px 9px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    color: #555;
-    background: #fff;
-    font-size: 11px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #555;
+  background: #fff;
+  font-size: 11px;
 }
 
 .status-select:focus {
-    border-color: #e31b23;
-    outline: 0;
+  border-color: #e31b23;
+  outline: 0;
 }
 
 .status-select:disabled {
@@ -268,15 +265,81 @@ function handleCoverLetterCreated(applicationId) {
 }
 
 .delete-btn {
-    padding: 0;
-    border: 0;
-    color: #999;
-    background: none;
-    font-size: 11px;
-    cursor: pointer;
+  padding: 0;
+  border: 0;
+  color: #999;
+  background: none;
+  font-size: 11px;
+  cursor: pointer;
 }
 
 .delete-btn:hover {
-    color: #e31b23;
+  color: #e31b23;
+}
+
+@media (max-width: 760px) {
+  .app-head {
+    padding-bottom: 12px;
+  }
+
+  .app-table {
+    background: transparent;
+  }
+
+  .table-row {
+    grid-template-areas:
+      'company status'
+      'meta delete'
+      'actions actions';
+    grid-template-columns: minmax(0, 1fr) minmax(112px, 0.7fr);
+    gap: 10px 12px;
+    min-height: 0;
+    padding: 16px;
+    background: #fff;
+  }
+
+  .company-name {
+    grid-area: company;
+    min-width: 0;
+  }
+
+  .company-meta {
+    grid-area: meta;
+    overflow-wrap: anywhere;
+  }
+
+  .preparation-actions {
+    grid-area: actions;
+  }
+
+  .status-select {
+    grid-area: status;
+  }
+
+  .delete-btn {
+    grid-area: delete;
+    justify-self: end;
+    align-self: center;
+    padding: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-row {
+    grid-template-areas:
+      'company delete'
+      'meta meta'
+      'status status'
+      'actions actions';
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .preparation-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .preparation-actions button {
+    min-height: 38px;
+  }
 }
 </style>

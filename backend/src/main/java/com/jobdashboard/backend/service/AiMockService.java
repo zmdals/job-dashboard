@@ -62,7 +62,10 @@ public class AiMockService {
                 .orElseThrow(() -> new ResourceNotFoundException("지원 내역을 찾을 수 없습니다."));
 
         // 기존 분석 있으면 삭제 (덮어쓰기)
+        // flush를 안 하면 Hibernate가 삭제보다 아래쪽의 insert를 먼저 실행해서
+        // application_id unique 제약(OneToOne)에 걸려 재분석 시 500이 남
         matchAnalysisRepository.deleteByApplicationId(applicationId);
+        matchAnalysisRepository.flush();
 
         boolean withCoverLetter = req.getIncludeCoverLetter() != null && req.getIncludeCoverLetter();
         int mockScore = withCoverLetter ? 84 : 72;

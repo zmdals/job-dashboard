@@ -9,18 +9,13 @@
 
 ## **R&R**
 
-| 이름     | 역할                         | 담당                                                       | GitHub                          |
-| -------- | ---------------------------- | ---------------------------------------------------------- | ------------------------------- |
-| 임승민   | Backend, DB                  | Auth, Application, AI Mock API, 코드 리뷰, GitHub 형상관리 | https://github.com/zmdals       |
-| 황가인   | Backend, DB                  | User & User 하위 API 개발,                                 |
-| ERD 생성 | https://github.com/gainhwang |
-| 장서연   | Frontend                     | 지원 현황 · 내 프로필 페이지, API 연동 구현                | https://github.com/seoyeonskala |
-| 신동운   | PM                           | FE-자기소개서 API 연동,                                    |
-
-BE-선호 공고 CRUD 개발,
-발표 | https://github.com/shindw3798 |
-| 신동범 | Frontend | 로그인 · 채용 공고 페이지,
-반응형 모바일 웹 화면 구현 | https://github.com/tls8012 |
+| 이름   | 역할        | 담당                                                       | GitHub                          |
+| ------ | ----------- | ---------------------------------------------------------- | ------------------------------- |
+| 임승민 | Backend, DB | Auth, Application, AI Mock API, 코드 리뷰, GitHub 형상관리 | https://github.com/zmdals       |
+| 황가인 | Backend, DB | User 및 User 하위 API 개발, ERD 생성                       | https://github.com/gainhwang    |
+| 장서연 | Frontend    | 지원 현황 · 내 프로필 페이지, API 연동 구현                | https://github.com/seoyeonskala |
+| 신동운 | PM          | FE 자기소개서 API 연동, BE 선호 공고 CRUD 개발, 발표       | https://github.com/shindw3798   |
+| 신동범 | Frontend    | 로그인 · 채용공고 페이지, 반응형 모바일 웹 화면 구현       | https://github.com/tls8012      |
 
 ## 프로젝트 개요
 
